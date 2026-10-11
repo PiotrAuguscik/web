@@ -466,9 +466,11 @@ function atmosphere(dt){const hour=(18.33+state.time/60)%24;dayPhase=hour;const 
 }
 function updateCamera(dt){
  const pitch=grounded?0:flightPitch;
- const direction=new T.Vector3(Math.sin(heading)*Math.cos(pitch),Math.sin(pitch),Math.cos(heading)*Math.cos(pitch));
- cameraTarget.copy(bird.position).addScaledVector(direction,2).add(new T.Vector3(0,1,0));
- cameraDesired.copy(bird.position).addScaledVector(direction,-10).add(new T.Vector3(0,3.1,0));
+ // Chase the crow's heading; climbing must not orbit the camera below it.
+ const direction=new T.Vector3(Math.sin(heading),0,Math.cos(heading));
+ const cameraTilt=clamp(pitch,-.6,.6);
+ cameraTarget.copy(bird.position).addScaledVector(direction,2).add(new T.Vector3(0,1+cameraTilt*.5,0));
+ cameraDesired.copy(bird.position).addScaledVector(direction,-10).add(new T.Vector3(0,3.1-cameraTilt*1.5,0));
  cameraDesired.y=Math.max(cameraDesired.y,groundAt(cameraDesired.x,cameraDesired.z,bird.position.y)+1);
  // The look-ahead point can be inside a bin even when the crow is outside it.
  // Check the view to the crow and lift the camera over props before zooming in.
@@ -487,7 +489,10 @@ function updateCamera(dt){
   }
  }
  if(view.nearest<view.length)cameraDesired.copy(origin).addScaledVector(view.delta,view.nearest);
- camera.position.lerp(cameraDesired,1-Math.exp(-9*dt));camera.lookAt(cameraTarget);camera.fov=lerp(camera.fov,Math.abs(speed)>23?70:62,dt*2);camera.updateProjectionMatrix();
+ camera.position.lerp(cameraDesired,1-Math.exp(-9*dt));
+ // World-space smoothing otherwise leaves the camera below a fast ascent.
+ camera.position.y=clamp(camera.position.y,bird.position.y+1.7,Math.max(cameraDesired.y,bird.position.y+5.5));
+ camera.lookAt(cameraTarget);camera.fov=lerp(camera.fov,Math.abs(speed)>23?70:62,dt*2);camera.updateProjectionMatrix();
  updateFlightAim();
 }
 function updateFlightAim(){
@@ -637,7 +642,10 @@ touchControl($('world'),e=>{lookX=e.clientX;lookY=e.clientY;},e=>{if(!touchMode)
 $('touchCaw').onclick=()=>{if(running&&!paused)caw();};$('mobileCollection').onclick=()=>{collection();save();};$('mobileMap').onclick=toggleMap;$('mobileDetails').onclick=mobileDetails;
 const swapLabel=document.createElement('label');swapLabel.className='touch-setting menu-touch-setting';swapLabel.innerHTML='<input id="menuTouchSwap" type="checkbox"> Zamień strony sterowania';document.querySelector('#menu .audio-settings').after(swapLabel);$('menuTouchSwap').checked=touchSwapped;$('menuTouchSwap').onchange=()=>setTouchSwapped($('menuTouchSwap').checked);
 if(touchMode){document.querySelector('.menunote').textContent='Telefon lub komputer · WebGL 2 · słuchawki zalecane';}
-document.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!touchMode){touchMode=true;applyTouchLayout();resetFlightInput(true);}},true);
+document.addEventListener('pointerdown',e=>{
+ if(e.pointerType==='touch'&&!touchMode){touchMode=true;applyTouchLayout();resetFlightInput(true);}
+ else if(e.pointerType==='mouse'&&touchMode){touchMode=false;applyTouchLayout();resetFlightInput();}
+},true);
 function tick(){requestAnimationFrame(tick);const dt=Math.min(clock.getDelta(),.05);if(running&&!paused){state.time+=dt;lootGrace=Math.max(0,lootGrace-dt);invulnerable=Math.max(0,invulnerable-dt);cawTimer=Math.max(0,cawTimer-dt);moveBird(dt);interact(dt);const night=atmosphere(dt);updateCats(dt,night>.5);updateRivals(dt);updateFamilyWorld(dt);updateHumans(dt);updateDrops(dt);updateTruck(dt);updateCamera(dt);if(state.score>=100)energy=Math.min(100,energy+dt*1.5);if(state.time-lastSave>5){save();lastSave=state.time;}if(state.time-lastUi>.15){updateHUD();lastUi=state.time;}if(state.time-lastMap>.15){drawMap($('minimap'));lastMap=state.time;}}
  else if(!started){state.time=0;atmosphere(dt);const t=performance.now()*.000035;camera.position.set(home.x-9+Math.sin(t)*3,home.y+12,home.z-23);camera.lookAt(home.clone().add(new T.Vector3(9,1,25)));animateCrow(bird,performance.now()/1000,false,0);updateHUD();drawMap($('minimap'));}
  updateAudioMix();if(toastTime>0&&!paused){toastTime-=dt;if(toastTime<=0)$('toast').style.opacity=0;}for(const b of bins){b.glint.visible=!b.empty;b.glint.scale.setScalar(.055*(.8+Math.sin(performance.now()*.006+b.index)*.5));if(!searching||searching!==b)b.lid.rotation.x=lerp(b.lid.rotation.x,b.empty?-1.3:0,dt*2);}updateGuides();renderer.render(scene,camera);
