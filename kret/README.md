@@ -1,6 +1,6 @@
 # Kret — Zaginiona rodzina
 
-Przygoda przeglądarkowa w przekroju ziemi. Wersja 2.1: swobodny ruch i organiczne, zaokrąglone tunele z ciągłym usuwaniem ziemi na całym odcinku ruchu. Na komputer, telefon i tablet, bez instalacji ani zewnętrznych bibliotek.
+Przygoda przeglądarkowa w przekroju ziemi. Wersja 2.2: swobodne tunele, widoczne akcje i czytelna informacja o zmianach stanu. Na komputer, telefon i tablet, bez instalacji ani zewnętrznych bibliotek.
 
 ## Cel
 
@@ -14,7 +14,7 @@ Odnajdź Pikusia pod korzeniami ogrodu, Figę w zakopanych ruinach oraz Tuptusia
 - Spacja / Nasłuch: zielone drgania to jedzenie, złote to rodzina, czerwone to zagrożenia. Blisko wejścia możesz wystawić sam nos.
 - Q / Zjedz: odzyskaj siły.
 - E: zawołaj małego kreta, odkryj przedmiot, przesuń mały kamień albo otwórz urządzanie nory.
-- F / Zasyp: pokaż dokładny obszar zasypania za kretem. F, Enter lub Zasyp tutaj potwierdza; Escape lub Anuluj rezygnuje. Podczas podglądu świat jest zatrzymany. Przycisk znajduje się także w panelu nory.
+- F / Zasyp: jednym naciśnięciem zasyp przejście za sobą na ostatniej trasie. Złote koło pokazuje zasypane miejsce. Nie trzeba potwierdzać ani zatrzymywać świata. Brak bezpiecznego miejsca daje wyraźny powód, a sterowanie pozostaje aktywne. Zasypywanie działa również bez energii; pozostaw bezpieczne miejsce dla rodziny i wnętrza komór.
 - Shift / Zryw: szybszy bieg w istniejących tunelach, po uratowaniu Figi.
 - M: mapa; P / Escape: pauza. W pauzie można włączyć dźwięk.
 
@@ -30,9 +30,13 @@ Lis wchodzi tylko istniejącym otworem przy kopcu, porusza się otwartymi przej�
 
 Komunikaty, statystyki i sterowanie mają wydzielone miejsce poza obszarem planszy. Kamera śledzi kreta również na powierzchni.
 
+Pasek nad planszą pokazuje aktualną sytuację i przycisk najlepszej czynności. Przy małym krecie pojawia się Zawołaj, złote zaznaczenie postaci oraz podświetlenie przycisku. Po zawołaniu widać stan idzie za tobą; zablokowana droga powoduje wskazówkę o poszerzeniu tunelu. Przedmioty, niski poziom energii, zalanie, wejście do nowej krainy, odpoczynek i zdobyte zasoby mają osobne potwierdzenia.
+
+Uciekaj!, kierunek drapieżnika, czerwone obramowanie i liczba utraconego zdrowia pokazują atak. Po ataku zwierzę odsuwa się przez 3,5 sekundy, kret ma 5 sekund ochrony oraz szybszy ruch i kopanie nawet bez energii. Przyciśnięcie przez kamień nie blokuje ucieczki: można ruszać od kamienia albo użyć Wydostań, które prowadzi do najbliższej dostępnej strony. Te zmiany nie teleportują kreta ani nie usuwają skały.
+
 ## Zapis
 
-Postęp zapisuje się co 5 sekund i przy pauzie, osobno w każdej przeglądarce. Wersja 2.1 zachowuje zapis wersji 2, tunele, kopce, położenia kamieni i odkrycia. Zapis starej wersji 1 nie jest usuwany. Zasłabnięcie pozwala wrócić do nory z zachowaniem tuneli, odkryć i komór. Towarzyszące małe krety czekają wtedy w miejscu, w którym zostały.
+Postęp zapisuje się co 5 sekund i przy pauzie, osobno w każdej przeglądarce. Wersja 2.2 zachowuje zapis wersji 2, tunele, kopce, położenia kamieni i odkrycia. Zapis starej wersji 1 nie jest usuwany. Zasłabnięcie pozwala wrócić do nory z zachowaniem tuneli, odkryć i komór. Towarzyszące małe krety czekają wtedy w miejscu, w którym zostały.
 
 ## Uruchomienie
 
