@@ -1,6 +1,6 @@
 # Kret — Zaginiona rodzina
 
-Przygoda przeglądarkowa w przekroju ziemi. Wersja 2: swobodny ruch we wszystkich kierunkach i organiczne, zaokrąglone tunele. Na komputer, telefon i tablet, bez instalacji ani zewnętrznych bibliotek.
+Przygoda przeglądarkowa w przekroju ziemi. Wersja 2.1: swobodny ruch i organiczne, zaokrąglone tunele z ciągłym usuwaniem ziemi na całym odcinku ruchu. Na komputer, telefon i tablet, bez instalacji ani zewnętrznych bibliotek.
 
 ## Cel
 
@@ -10,11 +10,11 @@ Odnajdź Pikusia pod korzeniami ogrodu, Figę w zakopanych ruinach oraz Tuptusia
 
 - WASD / strzałki: płynny ruch, także ukośnie; przytrzymanie kierunku kopie.
 - Mysz: przytrzymaj przycisk na planszy, aby kopać w stronę kursora.
-- Telefon i tablet: joystick w dowolnym kierunku oraz przyciski dotykowe.
+- Telefon i tablet: joystick po prawej, przyciski czynności po lewej. Działa ruch w dowolnym kierunku.
 - Spacja / Nasłuch: zielone drgania to jedzenie, złote to rodzina, czerwone to zagrożenia. Blisko wejścia możesz wystawić sam nos.
 - Q / Zjedz: odzyskaj siły.
-- E: zawołaj małego kreta, przesuń mały kamień albo otwórz urządzanie nory.
-- F: zasyp przejście za sobą. Przycisk znajduje się także w panelu nory.
+- E: zawołaj małego kreta, odkryj przedmiot, przesuń mały kamień albo otwórz urządzanie nory.
+- F / Zasyp: pokaż dokładny obszar zasypania za kretem. F, Enter lub Zasyp tutaj potwierdza; Escape lub Anuluj rezygnuje. Podczas podglądu świat jest zatrzymany. Przycisk znajduje się także w panelu nory.
 - Shift / Zryw: szybszy bieg w istniejących tunelach, po uratowaniu Figi.
 - M: mapa; P / Escape: pauza. W pauzie można włączyć dźwięk.
 
@@ -22,13 +22,17 @@ Odnajdź Pikusia pod korzeniami ogrodu, Figę w zakopanych ruinach oraz Tuptusia
 
 Ogród korzeni, piasek pod łąką, zakopane ruiny, podziemny strumień i jaskinia świecących grzybów. Duże skały są rozpoznawalnymi przeszkodami z drogą dookoła. Małe kamienie można przesuwać, a ulepszonymi pazurkami kruszyć. Larwy, uciekające dżdżownice, liście, monety, bursztyn i stare przedmioty nagradzają eksplorację.
 
-Lis sięga tylko płytko pod powierzchnię i ostrzega przed atakiem. Wąż porusza się istniejącymi tunelami; kryjówka go zatrzymuje. Sowa poluje na powierzchni, gdzie obraz jest rozmyty. Deszcz i źródło dostarczają wody do otwartych przejść. Odpływy osuszają połączone tunele; spiżarnię można przenieść wraz z zapasami. Zasypanie drogi zatrzymuje zwierzęta i wodę, ale może też odciąć drogę rodzinie.
+Kopanie łączy tunele nawet wtedy, gdy punkt przed kretem jest już otwarty. Małe odizolowane resztki ziemi rozpadają się w pobliżu wykopu. Ostatni odcinek wyjścia jest pionowy, a na powierzchni powstaje kopiec z otworem. Kamienie bez podparcia ostrzegają drżeniem i strzałką przez 0,85 sekundy, potem spadają do pierwszego podparcia.
+
+Moneta daje 2 błyskotki na ulepszenia; but zawiera 4 materiały i 2 porcje jedzenia; bursztyn daje błyskotkę i pełną energię. Ruiny, źródło oraz świecący ogród mają osobne nagrody. Przedmioty zbierzesz po podejściu lub przyciskiem Odkryj. Zebrane monety i bursztyn znikają, pozostałe obiekty dostają oznaczenie ✓. Panel Rodzina pokazuje listę odkryć i nagrody.
+
+Lis wchodzi tylko istniejącym otworem przy kopcu, porusza się otwartymi przejściami do 35 pikseli pod powierzchnią i nie kopie ziemi ani nie atakuje przez ścianę. Ostrzega przed atakiem. Wąż porusza się istniejącymi tunelami; kryjówka go zatrzymuje. Sowa poluje na powierzchni, gdzie obraz jest rozmyty. Deszcz i źródło dostarczają wody do otwartych przejść. Woda jest symulowana co 0,1 sekundy w dwóch krokach, szybko spływa w dół i rozlewa się po bokach. Odpływy osuszają połączone tunele; spiżarnię można przenieść wraz z zapasami. Zasypanie drogi zatrzymuje zwierzęta i wodę, ale może też odciąć drogę rodzinie.
 
 Komunikaty, statystyki i sterowanie mają wydzielone miejsce poza obszarem planszy. Kamera śledzi kreta również na powierzchni.
 
 ## Zapis
 
-Postęp zapisuje się co 5 sekund i przy pauzie, osobno w każdej przeglądarce. Nowa mapa używa osobnego zapisu wersji 2; zapis starej wersji nie jest usuwany. Zasłabnięcie pozwala wrócić do nory z zachowaniem tuneli, odkryć i komór. Towarzyszące małe krety czekają wtedy w miejscu, w którym zostały.
+Postęp zapisuje się co 5 sekund i przy pauzie, osobno w każdej przeglądarce. Wersja 2.1 zachowuje zapis wersji 2, tunele, kopce, położenia kamieni i odkrycia. Zapis starej wersji 1 nie jest usuwany. Zasłabnięcie pozwala wrócić do nory z zachowaniem tuneli, odkryć i komór. Towarzyszące małe krety czekają wtedy w miejscu, w którym zostały.
 
 ## Uruchomienie
 
