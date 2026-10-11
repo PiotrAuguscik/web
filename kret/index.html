@@ -1,50 +1,19 @@
 <!doctype html>
-<html lang="pl">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#18231f">
-  <meta name="description" content="Zostań kretem: kop tunele, nasłuchuj drgań, zbuduj norę i przechytrz drapieżniki. Gra na komputer, telefon i tablet.">
-  <title>Kret — Podziemna przygoda</title>
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <canvas id="world" aria-label="Świat gry w przekroju ziemi. Steruj strzałkami lub joystickiem." tabindex="0"></canvas>
-  <header class="hud hidden" id="hud">
-    <div class="brand"><img src="./icon.svg" alt="" width="38" height="38"><div><b>KRET</b><small>Podziemna przygoda</small></div></div>
-    <div class="stats">
-      <div class="meter health"><span>♥ <span class="stat-name">Zdrowie</span></span><progress id="health" aria-label="Zdrowie" max="100" value="100"></progress></div>
-      <div class="meter hunger"><span>◉ <span class="stat-name">Sytość</span></span><progress id="hunger" aria-label="Sytość" max="100" value="100"></progress></div>
-      <div class="meter energy"><span>ϟ <span class="stat-name">Energia</span></span><progress id="energy" aria-label="Energia" max="100" value="100"></progress></div>
-    </div>
-    <button class="icon-btn" id="pause" aria-label="Pauza i pomoc">Ⅱ</button>
-  </header>
-  <aside id="journey" class="journey hidden"><span id="day">Dzień 1 / 3</span><span id="weather">☀ Spokojnie</span><div class="daybar"><i id="daybar"></i></div><p id="objective"></p></aside>
-  <div id="bag" class="bag hidden"><span id="food">🪱 0</span><span id="wood">🌿 0</span><span id="treasure">✦ 0</span><button id="map" title="Mapa odkrytych tuneli (M)" aria-label="Mapa odkrytych tuneli">⌖</button></div>
-  <div id="toast" role="status" aria-live="polite"></div>
-  <div id="context" class="context hidden"></div>
-  <div id="controls" class="controls hidden">
-    <div class="joystick" id="joystick" aria-label="Joystick dotykowy"><div class="joystick-cross">＋</div><div id="stick"></div></div>
-    <div class="actions">
-      <button id="listen" class="action listen"><span>◎</span>Nasłuch<span class="key">Spacja</span></button>
-      <button id="eat" class="action"><span>🪱</span>Zjedz<span class="key">Q</span></button>
-      <button id="build" class="action"><span>⌂</span>Nora<span class="key">E</span></button>
-    </div>
-  </div>
-  <div id="map-panel" class="map-panel hidden"><div><b>Twoje podziemia</b><button id="close-map" aria-label="Zamknij mapę">×</button></div><canvas id="minimap" width="432" height="216"></canvas><p>Odkryte tunele zostają na mapie. Złoty punkt to ty; zielony — nora.</p></div>
-  <section class="overlay" id="menu" aria-label="Menu gry">
-    <div class="menu-card">
-      <div class="eyebrow">MAŁY KRET. WIELKI ŚWIAT.</div>
-      <img class="hero-icon" src="./icon.svg" alt="Rysowany kret z różowym nosem">
-      <h1>Kret<span>Podziemna przygoda</span></h1>
-      <p class="intro">Pod ziemią jesteś u siebie.<br>Nad ziemią… lepiej słuchaj uważnie.</p>
-      <div class="menu-buttons"><button id="start" class="primary" disabled>Wczytywanie podziemi…</button><button id="continue" class="secondary hidden" disabled>Wróć do swojej nory</button></div>
-      <div class="menu-facts"><span>◎ Odkrywaj po drganiach</span><span>⌂ Zbuduj własną norę</span><span>☂ Przetrwaj trzy dni</span></div>
-      <button id="help" class="text-btn" disabled>Jak grać?</button><a class="back-link" href="../">Pozostałe gry ↗</a>
-    </div>
-  </section>
-  <section id="modal" class="overlay hidden" aria-label="Panel gry"><div class="panel"><button id="modal-close" class="close" aria-label="Zamknij">×</button><div id="modal-content"></div></div></section>
-  <script type="module" src="./game.js"></script>
-</body>
-</html>
+<html lang="pl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#18271f"><meta name="description" content="Swobodnie kop kręte tunele i odnajdź rodzinę kretów. Pięć podziemnych krain, sekrety i przygoda na komputer, telefon i tablet.">
+<title>Kret — Zaginiona rodzina</title><link rel="icon" href="./icon.svg"><link rel="stylesheet" href="./style.css?v=2.0.0">
+</head><body>
+<div id="game-ui" class="hidden">
+  <header class="hud"><div class="brand"><img src="./icon.svg" alt="" width="34" height="34"><b>KRET</b></div><div class="meters"><label>♥<progress id="health" aria-label="Zdrowie" max="100" value="100"></progress></label><label>◉<progress id="hunger" aria-label="Sytość" max="100" value="86"></progress></label><label>ϟ<progress id="energy" aria-label="Energia" max="100" value="100"></progress></label></div><button id="map" class="small" aria-label="Mapa odkrytych tuneli">⌖</button><button id="pause" class="small" aria-label="Pauza">Ⅱ</button></header>
+  <div class="info"><button id="mission" class="mission">Rodzina: 0 / 3</button><span id="zone">Ogród korzeni</span><div class="bag"><span id="food">🪱 3</span><span id="wood">🌿 5</span><span id="treasure">✦ 0</span></div></div>
+  <div id="notice" role="status" aria-live="polite"></div>
+  <div class="controls"><div class="joystick" id="joystick" aria-label="Joystick: ruch w dowolnym kierunku"><span>＋</span><div id="stick"></div></div><div class="actions"><button id="listen"><b>◎</b><span>Nasłuch</span><small>Spacja</small></button><button id="eat"><b>🪱</b><span>Zjedz</span><small>Q</small></button><button id="interact"><b>⌂</b><span id="action-label">Nora</span><small>E</small></button><button id="sprint" class="hidden"><b>ϟ</b><span>Zryw</span><small>Shift</small></button></div></div>
+  <span id="hint" class="hint">WASD / strzałki · można kopać ukośnie</span>
+</div>
+<main id="stage"><canvas id="world" tabindex="0" aria-label="Gra: poruszaj kretem i kop w dowolnym kierunku. Znajdź trzy małe krety i poprowadź je do nory."></canvas></main>
+<section class="overlay" id="menu"><div class="menu-card"><div class="eyebrow">NOWA PRZYGODA · SWOBODNE TUNELE</div><img class="hero" src="./icon.svg" alt="Rysowany kret"><h1>Kret<span>Zaginiona rodzina</span></h1><p>Pod ziemią słychać trzy małe głosy.<br>Wykop własną drogę i sprowadź rodzinę do domu.</p><button id="start" class="primary" disabled>Wczytywanie podziemi…</button><button id="continue" class="hidden" disabled>Wróć do przygody</button><div class="facts">Kręte tunele · pięć krain · odkrycia i ratunek</div><button id="help" class="text-btn" disabled>Jak grać?</button><a href="../">Pozostałe gry ↗</a><small id="save-note"></small></div></section>
+<section id="modal" class="overlay hidden"><div class="panel"><button id="close" class="close" aria-label="Zamknij panel">×</button><div id="modal-content"></div></div></section>
+<section id="map-panel" class="overlay hidden"><div class="panel"><button id="close-map" class="close" aria-label="Zamknij mapę">×</button><h2>Twoje podziemia</h2><canvas id="minimap" width="800" height="388"></canvas><p>Złoty punkt: ty. Zielony: dom. Złote gwiazdki: głosy rodziny. Mapa pokazuje odkryte miejsca.</p><button id="map-back" class="primary">Wracam do tunelu</button></div></section>
+<script type="module" src="./game.js?v=2.0.0"></script>
+</body></html>

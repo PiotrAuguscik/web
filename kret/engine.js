@@ -1,132 +1,126 @@
-export const W=72,H=36,SURFACE=4,DAY=120;
-export const TILE={SKY:0,SOIL:1,CLAY:2,ROOT:3,ROCK:4,AIR:5};
-const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+export const WIDTH=3200,HEIGHT=1552,CELL=8,COLS=WIDTH/CELL,ROWS=HEIGHT/CELL,RADIUS=14;
+export const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-function random(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+export const surface=x=>310+Math.sin(x/170)*15+Math.sin(x/410)*18;
+export const zone=x=>x<940?0:x<1510?1:x<2110?2:x<2740?3:4;
+export const ZONES=['Ogród korzeni','Piasek pod łąką','Zakopane ruiny','Podziemny strumień','Jaskinia grzybów'];
+function rng(seed){return()=>{let t=seed+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+function pack(a){let s='';for(let i=0;i<a.length;i+=8){let n=0;for(let j=0;j<8;j++)if(a[i+j])n|=1<<j;s+=n.toString(16).padStart(2,'0');}return s;}
+function unpack(s,n){const a=new Uint8Array(n);for(let i=0;i<s.length;i+=2){const b=parseInt(s.slice(i,i+2),16);for(let j=0;j<8;j++)a[i*4+j]=b>>j&1;}return a;}
 export class World{
-  constructor(seed=Date.now()){
-    this.seed=seed;this.rand=random(seed);this.time=0;this.health=100;this.hunger=90;this.energy=100;this.food=2;this.wood=4;this.treasure=0;this.stash=0;this.dug=0;this.eaten=0;this.claws=0;this.found=[];this.events=[];this.rooms=[];this.exits=[];this.drains=[];this.won=false;this.dead=false;this.invincible=0;this.pulse=0;this.listenCooldown=0;this.noise=0;this.stepClock=0;this.simClock=0;this.waterClock=0;this.digProgress=0;this.digTarget=-1;this.lastDir={x:1,y:0};this.p={x:12,y:10};this.home={x:12,y:10};
-    this.tiles=new Array(W*H);this.seen=new Array(W*H).fill(false);this.water=new Array(W*H).fill(0);this.foods=[];this.discoveries=[];
-    for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-      let t=y<SURFACE?0:1;const r=this.rand();
-      if(y>=SURFACE){if(r<.065)t=4;else if(r<.2&&y>9)t=2;else if(r<.24)t=3;}
-      if(x===0||x===W-1||y===H-1)t=4;
-      this.tiles[this.idx(x,y)]=t;
-    }
-    // Roots form recognizable obstacles under trees.
-    for(const tx of [8,27,45,62])for(let y=4;y<12;y++)for(let x=tx-1;x<=tx+1;x++)if(this.valid(x,y))this.tiles[this.idx(x,y)]=3;
-    this.carve(12,10,1);this.rooms.push({x:12,y:10,type:'home'});
-    for(let y=3;y<10;y++)this.tiles[this.idx(12,y)]=5;
-    this.tiles[this.idx(12,3)]=0;this.exits.push(12);
-    for(let x=9;x<=17;x++)this.tiles[this.idx(x,10)]=5;
-    for(const [x,y] of [[16,10],[18,11],[13,13],[10,12],[15,8],[7,10]]){this.tiles[this.idx(x,y)]=1;this.foods.push({x,y,type:'worm'});}
-    this.tiles[this.idx(15,10)]=3;this.tiles[this.idx(17,12)]=3;this.tiles[this.idx(10,13)]=3;
-    for(let i=0;i<125;i++){const x=2+Math.floor(this.rand()*(W-4)),y=5+Math.floor(this.rand()*(H-7));if(this.tile(x,y)!==4&&!this.foods.some(f=>f.x===x&&f.y===y))this.foods.push({x,y,type:this.tile(x,y)===3?'larva':'worm'});}
-    for(let i=0;i<15;i++)this.foods.push({x:3+Math.floor(this.rand()*(W-6)),y:3,type:i%3===0?'leaf':'worm'});
-    for(const [x,y,type] of [[22,13,'coin'],[33,17,'boot'],[48,25,'cave'],[58,11,'old']]){
-      this.discoveries.push({x,y,type,found:false});this.tiles[this.idx(x,y)]=1;
-      if(type!=='coin'){this.carve(x,y,type==='cave'?2:1);if(type==='old')for(let xx=x-5;xx<=x+5;xx++)this.tiles[this.idx(xx,y)]=5;}
-    }
-    this.predators=[{type:'fox',x:35,y:3,dir:-1,clock:0,alert:0},{type:'owl',x:49,y:1,dir:1,clock:0,alert:0},{type:'snake',x:57,y:11,dir:-1,clock:0,alert:0},{type:'fox',x:66,y:3,dir:1,clock:0,alert:0}];
-    this.predators.push({type:'snake',x:33,y:17,dir:1,clock:0,alert:0});this.peek=0;this.stashWetClock=0;this.reveal();
+  constructor(seed=20261011){
+    this.seed=seed;this.random=rng(seed);this.time=0;this.p={x:420,y:540};this.home={x:420,y:540};this.health=100;this.energy=100;this.hunger=86;this.food=3;this.wood=5;this.treasure=0;this.stash=0;this.claws=0;this.hearing=0;this.sprintUnlocked=false;this.cooldown=0;this.pulse=0;this.peek=0;this.noise=0;this.invincible=0;this.downed=false;this.won=false;this.facing={x:1,y:0};this.events=[];this.dug=0;this.moved=0;this.fillCount=0;this.waterClock=0;this._revealX=-999;this._revealY=-999;
+    this.open=new Uint8Array(COLS*ROWS);this.seen=new Uint8Array(COLS*ROWS);this.water=new Float32Array(COLS*ROWS);this.openSet=new Set();this.cuts=[];this.sight=[];this.path=[{...this.p}];this.exits=[420];this.rooms=[{x:420,y:540,type:'home'}];this.drains=[];
+    this.rocks=[{x:1080,y:580,r:53},{x:1360,y:900,r:62},{x:1670,y:720,r:44},{x:2100,y:1080,r:48},{x:2670,y:600,r:66},{x:2950,y:1180,r:73}];
+    for(let i=0;i<32;i++){const x=960+this.random()*2120,y=480+this.random()*940;this.rocks.push({x,y,r:12+this.random()*13,small:true});}
+    this.roots=[];for(const tx of [210,620,810,1190,2600])for(let branch=0;branch<3;branch++){let old={x:tx,y:surface(tx)};for(let i=1;i<7;i++){const next={x:tx+(branch-1)*i*20+Math.sin(i*2+tx)*20,y:surface(tx)+i*45};this.roots.push({a:old,b:next,w:Math.max(3,11-i)});old=next;}}
+    this.discoveries=[{x:585,y:585,type:'coin',title:'Moneta ogrodnika',found:false},{x:850,y:780,type:'boot',title:'But pełen liści',found:false},{x:1240,y:650,type:'spring',title:'Bursztyn pod łąką',found:false},{x:1770,y:860,type:'ruin',title:'Zapomniana studnia',found:false},{x:2470,y:1150,type:'cave',title:'Źródło w głębi ziemi',found:false},{x:2870,y:890,type:'mushroom',title:'Świecący ogród',found:false}];
+    this.kids=[{name:'Pikuś',x:740,y:670,state:'waiting',pathIndex:0},{name:'Figa',x:1860,y:1030,state:'waiting',pathIndex:0},{name:'Tuptuś',x:2840,y:950,state:'waiting',pathIndex:0}];
+    this.rocks=this.rocks.filter(r=>!this.kids.some(k=>distance(r,k)<r.r+100)&&!this.discoveries.some(d=>distance(r,d)<r.r+55));
+    this.carve(420,540,68);for(let y=surface(420)-22;y<540;y+=14)this.carve(420+Math.sin(y/60)*9,y,25);
+    for(const [x,y,r] of [[730,670,58],[850,780,49],[1240,650,58],[1750,880,78],[1810,950,58],[1860,1030,72],[2200,920,64],[2290,1010,64],[2450,1130,80],[2780,930,74],[2870,960,80]])this.carve(x,y,r);
+    for(let i=0;i<=18;i++)this.carve(1740+i*10,860+i*9,27);
+    for(let i=0;i<=23;i++)this.carve(2160+i*13,870+i*12,29);
+    this.foods=[];for(let i=0;i<260;i++){const x=100+this.random()*3000,y=surface(x)+80+this.random()*1020;if(!this.rockAt(x,y))this.foods.push({x,y,type:this.random()<.2?'larva':'worm',phase:this.random()*6});}
+    for(const [x,y] of [[510,550],[580,610],[660,630],[780,685],[500,450],[345,585],[880,770]])this.foods.push({x,y,type:'larva',phase:0});
+    for(let i=0;i<24;i++){const x=120+this.random()*2900;this.foods.push({x,y:surface(x)-14,type:i%3?'worm':'leaf',phase:i});}
+    this.predators=[{type:'fox',x:1260,y:surface(1260)-17,dir:-1,alert:0,warning:0,attack:0},{type:'fox',x:2580,y:surface(2580)-17,dir:1,alert:0,warning:0,attack:0},{type:'owl',x:1470,y:surface(1470)-145,dir:1,alert:0,warning:0,attack:0},{type:'snake',x:1780,y:900,angle:0,alert:0,warning:0,attack:0},{type:'snake',x:2260,y:970,angle:1,alert:0,warning:0,attack:0}];
+    for(const i of this.openSet){const x=i%COLS*CELL,y=Math.floor(i/COLS)*CELL;if(x>2160&&x<2560&&y>1060||x>1800&&x<1920&&y>1080)this.water[i]=.68;}this.reveal();
   }
-  idx(x,y){return y*W+x;}valid(x,y){return x>0&&x<W-1&&y>=1&&y<H-1;}
-  tile(x,y){return this.valid(x,y)?this.tiles[this.idx(x,y)]:4;}
-  open(x,y){const t=this.tile(x,y);return t===0||t===5;}
-  carve(cx,cy,r){for(let y=cy-r;y<=cy+r;y++)for(let x=cx-r;x<=cx+r;x++)if(this.valid(x,y)&&y>=SURFACE)this.tiles[this.idx(x,y)]=5;}
+  idx(x,y){return Math.floor(y/CELL)*COLS+Math.floor(x/CELL);}
+  valid(x,y){return x>=35&&x<=WIDTH-35&&y>=20&&y<=HEIGHT-40;}
+  isOpen(x,y){return this.valid(x,y)&&(y<surface(x)||this.open[this.idx(x,y)]===1);}
+  rockAt(x,y){return this.rocks.find(r=>distance(r,{x,y})<r.r+RADIUS-2);}
+  rootAt(x,y){return this.roots.some(r=>{const vx=r.b.x-r.a.x,vy=r.b.y-r.a.y,t=clamp(((x-r.a.x)*vx+(y-r.a.y)*vy)/(vx*vx+vy*vy),0,1);return Math.hypot(x-r.a.x-vx*t,y-r.a.y-vy*t)<r.w+16;});}
   event(text,type='info'){this.events.push({text,type});}
-  reveal(){const r=this.p.y<SURFACE?3.2:3.6;for(let y=Math.floor(this.p.y-r);y<=this.p.y+r;y++)for(let x=Math.floor(this.p.x-r);x<=this.p.x+r;x++)if(this.valid(x,y)&&Math.hypot(x-this.p.x,y-this.p.y)<=r)this.seen[this.idx(x,y)]=true;}
-  get day(){return Math.floor(this.time/DAY)+1;}
-  get raining(){return this.time>=DAY+25&&this.time<DAY+90||this.time>=DAY*3+15&&this.time%(DAY*2)<90;}
-  get nearHome(){return this.rooms.some(r=>distance(r,this.p)<2.5&&r.type!=='drain');}
-  get bedroom(){return this.rooms.find(r=>r.type==='bedroom'&&distance(r,this.p)<2.5);}
-  get progress(){return {days:Math.min(3,Math.floor(this.time/DAY)),rooms:Math.min(3,this.rooms.filter(r=>['bedroom','pantry','safe'].includes(r.type)).length),stash:Math.min(6,this.stash),exits:Math.min(2,this.exits.length)};}
-  move(dx,dy,dt){
-    if(this.dead)return;dx=Math.sign(dx);dy=Math.sign(dy);if(!dx&&!dy){this.digProgress=0;this.digTarget=-1;return;}if(dx&&dy)dy=0;
-    this.lastDir={x:dx,y:dy};const nx=this.p.x+dx,ny=this.p.y+dy,i=this.idx(nx,ny),t=this.tile(nx,ny);if(ny<3)return;
-    if(t===4){if(this.digTarget!==i)this.event('Kamień. Poszukaj drogi dookoła.');this.digTarget=i;this.digProgress=0;return;}
-    if(t!==0&&t!==5){
-      if(this.energy<1){if(this.digTarget!==i)this.event('Brak energii. Zjedz dżdżownicę lub odpocznij w norze.');this.digTarget=i;return;}
-      if(this.digTarget!==i){this.digTarget=i;this.digProgress=0;}
-      const hard=t===2?.58:t===3?.4:.2;this.digProgress+=dt*(1+this.claws*.45);this.noise=1;
-      if(this.digProgress<hard)return;
-      this.tiles[i]=5;this.dug++;this.energy=clamp(this.energy-(t===2?2.8:1.1),0,100);if(t===3){this.wood++;if(this.wood<9)this.event('Korzeń! +1 materiał do budowania.');}
-      this.digProgress=0;
-    }
-    if(this.stepClock>0)return;
-    const previousY=this.p.y;this.p.x=nx;this.p.y=ny;this.stepClock=this.water[i]>.35?.26:.15;this.digTarget=-1;
-    if(((ny===3&&previousY===4)||(ny===4&&previousY===3))&&this.open(nx,4)&&!this.exits.includes(nx)){this.exits.push(nx);this.event('Nowe wyjście awaryjne! Lis nie zna wszystkich twoich dróg.');}
+  paint(x,y,r,kind=1,record=true){
+    if(record)this.cuts.push({x,y,r,kind});
+    const x0=Math.max(0,Math.floor((x-r)/CELL)),x1=Math.min(COLS-1,Math.ceil((x+r)/CELL)),y0=Math.max(0,Math.floor((y-r)/CELL)),y1=Math.min(ROWS-1,Math.ceil((y+r)/CELL));
+    for(let gy=y0;gy<=y1;gy++)for(let gx=x0;gx<=x1;gx++)if(Math.hypot(gx*CELL+CELL/2-x,gy*CELL+CELL/2-y)<=r){const i=gy*COLS+gx;this.open[i]=kind?1:0;if(kind)this.openSet.add(i);else{this.openSet.delete(i);this.water[i]=0;}}
+  }
+  carve(x,y,r,record=true){const last=this.cuts[this.cuts.length-1];if(record&&last&&last.kind===1&&last.r===r&&distance(last,{x,y})<=3)return;this.paint(x,y,r,1,record);}
+  reveal(){if(Math.hypot(this.p.x-this._revealX,this.p.y-this._revealY)<12)return;this._revealX=this.p.x;this._revealY=this.p.y;const r=185;this.sight.push({x:this.p.x,y:this.p.y,r});for(let gy=Math.max(0,Math.floor((this.p.y-r)/CELL));gy<Math.min(ROWS,Math.ceil((this.p.y+r)/CELL));gy++)for(let gx=Math.max(0,Math.floor((this.p.x-r)/CELL));gx<Math.min(COLS,Math.ceil((this.p.x+r)/CELL));gx++)if(Math.hypot(gx*CELL-this.p.x,gy*CELL-this.p.y)<r)this.seen[gy*COLS+gx]=1;}
+  get surface(){return this.p.y<surface(this.p.x)+10;}
+  get raining(){return this.time%240>115&&this.time%240<165;}
+  get nearHome(){return distance(this.p,this.home)<80;}
+  get rescued(){return this.kids.filter(k=>k.state==='home').length;}
+  get nearRoom(){return this.rooms.find(r=>distance(r,this.p)<70);}
+  get waterHere(){return this.water[this.idx(this.p.x,this.p.y)]||0;}
+  get nextKid(){return this.kids.find(k=>k.state!=='home');}
+  get interactable(){return this.kids.find(k=>k.state==='waiting'&&distance(k,this.p)<74)||this.rocks.find(r=>r.small&&distance(r,this.p)<r.r+45);}
+  move(dx,dy,dt,sprint=false){
+    const len=Math.hypot(dx,dy);if(len<.12){this.noise=Math.max(0,this.noise-dt);return;}
+    dx/=Math.max(1,len);dy/=Math.max(1,len);this.facing={x:dx,y:dy};
+    const ahead={x:this.p.x+dx*30,y:this.p.y+dy*30};let rock=this.rockAt(ahead.x,ahead.y);
+    if(rock){if(rock.small&&this.claws>0){rock.hp=(rock.hp??.9)-dt*(this.claws+1);this.noise=1;if(rock.hp<=0){this.rocks.splice(this.rocks.indexOf(rock),1);this.wood++;this.event('Mały kamień skruszony. +1 materiał.');}else return;}else{this.blocked='rock';return;}}
+    const digging=!this.isOpen(ahead.x,ahead.y),root=digging&&this.rootAt(ahead.x,ahead.y);this.blocked=null;
+    if(digging&&this.energy<2){this.blocked='energy';return;}
+    let speed=digging?(root?33:zone(this.p.x)===1?88:64)*(1+this.claws*.22):112;
+    if(sprint&&this.sprintUnlocked&&this.energy>8&&!digging){speed=185;this.energy-=dt*8;}
+    if(this.waterHere>.5)speed*=.65;
+    const nx=clamp(this.p.x+dx*speed*dt,35,WIDTH-35),ground=surface(nx);let ny=clamp(this.p.y+dy*speed*dt,ground-RADIUS,HEIGHT-40);
+    if(this.surface&&Math.abs(dy)<.1)ny=ground-RADIUS;
+    if(this.rockAt(nx,ny)){this.blocked='rock';return;}
+    if(digging){this.carve(nx,ny,25);this.dug+=dt*speed;this.energy=Math.max(0,this.energy-dt*(root?2.2:1.2));this.noise=1;if(root){this.rootGather=(this.rootGather||0)+dt;if(this.rootGather>1.4){this.rootGather=0;this.wood++;this.event('Korzeń daje materiał.','quiet');}}}
+    const previousDepth=this.p.y-surface(this.p.x);this.moved+=Math.hypot(nx-this.p.x,ny-this.p.y);this.p={x:nx,y:ny};
+    if((previousDepth<0&&ny>ground||previousDepth>=0&&ny<ground)&&!this.exits.some(x=>Math.abs(x-nx)<65)){this.exits.push(nx);this.event('Nowe wyjście. Masz kolejną drogę ucieczki.');}
+    if(distance(this.p,this.path[this.path.length-1])>6){this.path.push({...this.p});if(this.path.length>4000){this.path.shift();for(const k of this.kids)k.pathIndex=Math.max(0,k.pathIndex-1);}}
     this.reveal();this.collect();
   }
   collect(){
-    for(let i=this.foods.length-1;i>=0;i--){const f=this.foods[i];if(distance(f,this.p)<.6){if(f.type==='leaf'){this.wood+=2;this.event('Suche liście! +2 materiały.');}else{this.food++;this.event(f.type==='larva'?'Larwa przy korzeniu! +1 jedzenie.':'Dżdżownica złapana! Q / Zjedz, aby odzyskać siły.');}this.foods.splice(i,1);}}
-    for(const d of this.discoveries){if(!d.found&&distance(d,this.p)<1.8){d.found=true;this.found.push(d.type);const msg={coin:'Zakopana moneta! +2 błyskotki na lepsze pazurki.',boot:'Stary but! Gotowa komora i +3 materiały.',cave:'Wielka jama pod drzewem! Idealna kryjówka.',old:'Tunele innego kreta. Ktoś już tu mieszkał…'};this.event(msg[d.type],'discovery');if(d.type==='coin')this.treasure+=2;if(d.type==='boot')this.wood+=3;if(d.type==='boot'||d.type==='cave')this.rooms.push({x:d.x,y:d.y,type:'shelter'});}}
+    for(let i=this.foods.length-1;i>=0;i--){const f=this.foods[i];if(distance(f,this.p)<26){if(f.type==='leaf'){this.wood+=2;this.event('+2 liście do nory.','quiet');}else{this.food++;this.event('+1 jedzenie.','quiet');}this.foods.splice(i,1);}}
+    for(const d of this.discoveries)if(!d.found&&distance(d,this.p)<55){d.found=true;this.treasure+=d.type==='coin'?2:1;this.wood+=d.type==='boot'?4:1;this.event(d.title+'! Błyskotka i materiały.','discovery');if(d.type==='spring')this.energy=100;}
+    if(this.nearHome)for(const k of this.kids)if(k.state==='follow'&&distance(k,this.home)<100){k.state='home';this.health=100;this.energy=100;this.food+=2;if(this.rescued===1){this.claws=Math.max(1,this.claws);this.hearing=1;this.event(k.name+' wrócił do domu! Mocniejsze pazurki i dalszy nasłuch.','rescue');}else if(this.rescued===2){this.sprintUnlocked=true;this.event(k.name+' bezpiecznie w norze! Odblokowany zryw (Shift).','rescue');}else{this.won=true;this.event('Cała rodzina jest w domu. Udało się!','win');}}
   }
-  eat(){if(!this.food){this.event('Nie masz jedzenia. Nasłuchuj drgań w ziemi.');return false;}if(this.hunger>95&&this.energy>95){this.event('Brzuszek pełny. Zachowaj jedzenie na później.');return false;}this.food--;this.eaten++;this.hunger=clamp(this.hunger+32,0,100);this.energy=clamp(this.energy+24,0,100);this.health=clamp(this.health+5,0,100);this.event('Mniam! Sytość +32, energia +24.');return true;}
-  listen(){if(this.listenCooldown>0){this.event('Jeszcze chwila… Nasłuch wróci za '+Math.ceil(this.listenCooldown)+' s.');return false;}this.pulse=3.5;this.listenCooldown=6;if(this.p.y===4&&this.open(this.p.x,3)){this.peek=2.5;this.event('Wystawiasz nos i nasłuchujesz. Twoje ciało zostaje w tunelu.');}else this.event('Ciche drgania: jedzenie. Ciężkie, czerwone: zagrożenie.');return true;}
+  interact(){const object=this.interactable;if(!object)return false;if(object.name){object.state='follow';object.pathIndex=this.path.length-1;this.event(object.name+' idzie za tobą. Poprowadź go tunelami do nory.','rescue');}else{const nx=object.x+this.facing.x*34,ny=object.y+this.facing.y*34;if(this.valid(nx,ny)&&!this.rocks.some(r=>r!==object&&distance(r,{x:nx,y:ny})<r.r+object.r)){object.x=nx;object.y=ny;this.energy=Math.max(0,this.energy-4);this.event('Przesuwasz mały kamień.','quiet');}}return true;}
+  listen(){if(this.cooldown>0)return false;this.pulse=3.8;this.cooldown=5;this.peek=this.surface?0:this.p.y-surface(this.p.x)<42?2:0;this.event(this.peek?'Wystawiasz nos. Ciężkie kroki ostrzegają przed lisem.':'Nasłuch: zielone drgania — jedzenie, złote — mały kret, czerwone — zagrożenie.');return true;}
+  eat(){if(!this.food){this.event('Brak jedzenia. Nasłuchuj drobnych drgań.');return false;}if(this.energy>95&&this.hunger>95)return false;this.food--;this.hunger=clamp(this.hunger+30,0,100);this.energy=clamp(this.energy+38,0,100);this.health=clamp(this.health+10,0,100);this.event('Mniam. Siły wracają.','quiet');return true;}
+  seal(){const x=this.p.x-this.facing.x*58,y=this.p.y-this.facing.y*58;if(y<surface(x)+40||distance({x,y},this.home)<105||this.rooms.some(r=>distance(r,{x,y})<80)||this.kids.some(k=>distance(k,{x,y})<65)){this.event('Tu zostaw wolne przejście.');return false;}if(!this.isOpen(x,y)){this.event('Za tobą jest już ziemia.');return false;}this.paint(x,y,28,0);this.fillCount++;this.energy=Math.max(0,this.energy-5);this.event('Przejście za tobą zasypane. Możesz wykopać je ponownie.');return true;}
   build(type){
-    if(type==='claws'){if(this.claws>=2){this.event('Masz już najlepsze pazurki.');return false;}if(this.wood<6&&this.treasure<2){this.event('Potrzebujesz 6 materiałów albo 2 błyskotek.');return false;}if(this.treasure>=2)this.treasure-=2;else this.wood-=6;this.claws++;this.event('Mocniejsze pazurki! Szybciej kopiesz.');return true;}
-    const relocating=type==='relocate';const cost={bedroom:3,pantry:3,safe:4,drain:2,relocate:2}[type];if(!cost)return false;
-    if(relocating&&!this.rooms.some(r=>r.type==='pantry')){this.event('Najpierw zbuduj spiżarnię.');return false;}
-    if(this.p.y<7){this.event('Buduj głębiej: co najmniej 3 warstwy pod ziemią.');return false;}
-    if(this.wood<cost){this.event('Za mało materiałów. Kop korzenie lub zbieraj liście na powierzchni.');return false;}
-    if(this.rooms.some(r=>distance(r,this.p)<3.5)||this.drains.some(r=>distance(r,this.p)<3)){this.event('Zostaw trochę miejsca między komorami. Odejdź co najmniej 4 kroki.');return false;}
-    for(let y=this.p.y-1;y<=this.p.y+1;y++)for(let x=this.p.x-1;x<=this.p.x+1;x++)if(this.tile(x,y)===4){this.event('W tym miejscu jest skała. Wybierz wolną przestrzeń.');return false;}
-    if(type!=='drain'&&this.rooms.some(r=>r.type===type)){this.event('Masz już taką komorę. Zbuduj kolejny rodzaj.');return false;}
-    this.wood-=cost;this.carve(this.p.x,this.p.y,1);if(type==='drain')this.drains.push({...this.p});else{if(relocating){this.rooms=this.rooms.filter(r=>r.type!=='pantry');this.stashWetClock=0;}this.rooms.push({...this.p,type:relocating?'pantry':type});}this.reveal();
-    this.event({bedroom:'Sypialnia gotowa! Tu szybciej odpoczywasz.',pantry:'Spiżarnia gotowa! Zanieś tu zapasy.',safe:'Bezpieczna komora! Drapieżniki nie wejdą do środka.',drain:'Odpływ gotowy! Osusza połączone tunele.',relocate:'Spiżarnia przeniesiona razem ze wszystkimi zapasami.'}[type]);this.checkWin();return true;
+    if(type==='claws'){if(this.claws>=3){this.event('Masz najlepsze pazurki.');return false;}if(this.treasure<2&&this.wood<6){this.event('Potrzeba 2 błyskotek lub 6 materiałów.');return false;}if(this.treasure>=2)this.treasure-=2;else this.wood-=6;this.claws++;this.event('Lepsze pazurki: kopiesz szybciej i kruszysz małe kamienie.');return true;}
+    if(type==='hearing'){if(this.treasure<1){this.event('Znajdź błyskotkę, żeby rozwinąć nasłuch.');return false;}this.treasure--;this.hearing++;this.event('Dalszy nasłuch. Łatwiej wyczujesz wołanie rodziny.');return true;}
+    const relocate=type==='relocate',cost={bedroom:3,pantry:3,safe:4,drain:2,relocate:2}[type];if(!cost)return false;
+    if(this.p.y<surface(this.p.x)+90){this.event('Komorę buduj trochę głębiej pod ziemią.');return false;}if(this.wood<cost){this.event('Potrzebujesz więcej materiałów z korzeni i liści.');return false;}if(this.rooms.some(r=>distance(r,this.p)<135)||this.drains.some(r=>distance(r,this.p)<100)){this.event('Odejdź trochę od istniejącej komory.');return false;}if(this.rocks.some(r=>distance(r,this.p)<r.r+65)){this.event('Duża skała zajmuje miejsce komory.');return false;}
+    if(relocate&&!this.rooms.some(r=>r.type==='pantry')){this.event('Najpierw zbuduj spiżarnię.');return false;}if(!relocate&&type!=='drain'&&this.rooms.some(r=>r.type===type)){this.event('Taka komora już istnieje.');return false;}
+    this.wood-=cost;this.carve(this.p.x,this.p.y,65);if(type==='drain')this.drains.push({...this.p});else{if(relocate)this.rooms=this.rooms.filter(r=>r.type!=='pantry');this.rooms.push({...this.p,type:relocate?'pantry':type});}this.event({bedroom:'Sypialnia gotowa.',pantry:'Spiżarnia gotowa.',safe:'Kryjówka zatrzyma węża.',drain:'Odpływ osusza połączone tunele.',relocate:'Spiżarnia przeniesiona wraz z zapasami.'}[type]);return true;
   }
-  deposit(){if(!this.rooms.some(r=>r.type==='pantry'&&distance(r,this.p)<2.5)){this.event('Zapasy składaj w spiżarni. Najpierw ją zbuduj.');return false;}const n=Math.max(0,this.food-2);if(!n){this.event('Zachowaj 2 porcje na drogę. Przynieś więcej jedzenia.');return false;}this.food-=n;this.stash+=n;this.event('W spiżarni: '+this.stash+' porcji. Dwie zostają przy tobie.');this.checkWin();return true;}
-  withdraw(){if(!this.rooms.some(r=>r.type==='pantry'&&distance(r,this.p)<2.5)||!this.stash){this.event('Nie ma tutaj zapasów do zabrania.');return false;}const n=Math.min(3,this.stash);this.stash-=n;this.food+=n;this.event('Zabierasz '+n+' porcje na wyprawę.');return true;}
-  rest(){if(!this.nearHome){this.event('Odpoczywaj w norze albo odkrytej kryjówce.');return false;}if(this.hunger<18){this.event('Zjedz przed odpoczynkiem, żeby nie obudzić się głodnym.');return false;}if(this.water[this.idx(this.p.x,this.p.y)]>.2){this.event('Tu jest mokro. Znajdź suchą komorę albo zbuduj odpływ.');return false;}const bed=!!this.bedroom;this.energy=clamp(this.energy+(bed?60:35),0,100);this.health=clamp(this.health+(bed?30:15),0,100);this.hunger-=12;this.time+=25;this.event('Drzemka: siły wracają, mija 25 sekund.');this.checkWin();return true;}
-  tick(dt,input={x:0,y:0}){
-    if(this.dead)return;const rainBefore=this.raining,dayBefore=this.day;this.time+=dt;this.stepClock=Math.max(0,this.stepClock-dt);this.invincible=Math.max(0,this.invincible-dt);this.listenCooldown=Math.max(0,this.listenCooldown-dt);this.pulse=Math.max(0,this.pulse-dt);this.noise=Math.max(0,this.noise-dt*.6);
-    this.move(input.x,input.y,dt);
-    this.hunger=Math.max(0,this.hunger-dt*.15);if(this.hunger<=0)this.health-=dt*3;
-    if(!input.x&&!input.y){this.energy=clamp(this.energy+dt*(this.nearHome?5:.9),0,100);if(this.nearHome&&this.hunger>20)this.health=clamp(this.health+dt*.9,0,100);}
-    if(this.water[this.idx(this.p.x,this.p.y)]>.65){this.energy=Math.max(0,this.energy-dt*2);this.health-=dt*2.5;}
-    if(!rainBefore&&this.raining)this.event('Nadchodzi ulewa! Woda wlewa się przez wyjścia. Buduj odpływy.','danger');
-    if(rainBefore&&!this.raining){this.event('Deszcz ustaje. Na powierzchni pojawiło się dużo jedzenia!');for(let i=0;i<12;i++)this.foods.push({x:3+Math.floor(this.rand()*(W-6)),y:3,type:i%4===0?'leaf':'worm'});}
-    this.peek=Math.max(0,this.peek-dt);const pantry=this.rooms.find(r=>r.type==='pantry');if(pantry&&this.stash>0&&this.water[this.idx(pantry.x,pantry.y)]>.6){this.stashWetClock+=dt;if(this.stashWetClock>20){this.stashWetClock=0;this.stash--;this.event('Spiżarnia zalana! Tracisz porcję. Przenieś zapasy wyżej lub zbuduj odpływ.','danger');}}else this.stashWetClock=0;
-    if(this.day!==dayBefore){this.event('Dzień '+this.day+'. Nowa wyprawa, nowe drgania.');for(let i=0;i<8;i++)this.foods.push({x:3+Math.floor(this.rand()*(W-6)),y:3,type:i%2?'leaf':'worm'});}
-    this.simClock+=dt;if(this.simClock>.4){this.simClock=0;this.simulate(.4);}
-    this.waterClock+=dt;if(this.waterClock>.45){this.waterClock=0;this.flowWater();}
-    if(this.health<=0){this.health=0;this.dead=true;this.event('Przygoda dobiegła końca.','dead');}
-    this.checkWin();
+  rest(){if(!this.nearRoom){this.event('Odpocznij w norze lub zbudowanej komorze.');return false;}if(this.waterHere>.4){this.event('Znajdź suche miejsce do odpoczynku.');return false;}if(this.hunger<12){this.event('Najpierw coś zjedz.');return false;}this.energy=100;this.health=clamp(this.health+40,0,100);this.hunger-=8;this.time+=15;this.event('Krótka drzemka. Łapki znowu pełne sił.');return true;}
+  deposit(){if(this.nearRoom?.type!=='pantry'){this.event('Zapasy odkładaj w spiżarni.');return false;}const n=Math.max(0,this.food-3);this.food-=n;this.stash+=n;this.event('Zapasy w spiżarni: '+this.stash+'. Trzy porcje zostają na drogę.');return n>0;}
+  withdraw(){if(this.nearRoom?.type!=='pantry'||!this.stash)return false;const n=Math.min(4,this.stash);this.food+=n;this.stash-=n;this.event('Zabierasz '+n+' porcje.');return true;}
+  safeAt(p){return distance(p,this.home)<90||this.rooms.some(r=>r.type==='safe'&&distance(p,r)<80);}
+  damage(amount,text){if(this.invincible||this.safeAt(this.p))return;this.health-=amount;this.invincible=3;this.event(text,'danger');if(this.health<=0){this.health=0;this.downed=true;this.event('Potrzebujesz odpoczynku. Twoje tunele i odkrycia zostają.','down');}}
+  recover(){this.p={...this.home};this.health=85;this.energy=95;this.hunger=Math.max(50,this.hunger);this.food=Math.max(1,this.food-2);this.downed=false;this.invincible=5;for(const k of this.kids)if(k.state==='follow')k.state='waiting';this.path=[{...this.p}];this._revealX=-999;this.reveal();this.event('Wracasz do nory. Rodzina nadal na ciebie czeka.');}
+  tick(dt,input={x:0,y:0,sprint:false}){
+    if(this.downed)return;const wasRain=this.raining;this.time+=dt;this.cooldown=Math.max(0,this.cooldown-dt);this.pulse=Math.max(0,this.pulse-dt);this.peek=Math.max(0,this.peek-dt);this.invincible=Math.max(0,this.invincible-dt);this.noise=Math.max(0,this.noise-dt*.8);this.move(input.x,input.y,dt,input.sprint);
+    this.hunger=Math.max(0,this.hunger-dt*.055);if(this.hunger===0)this.damage(dt*2,'Głód. Zjedz coś lub wróć po zapasy.');
+    if(Math.hypot(input.x,input.y)<.1){this.energy=clamp(this.energy+dt*(this.nearRoom?8:1.5),0,100);if(this.nearHome)this.health=clamp(this.health+dt*2,0,100);}
+    if(this.waterHere>.75){this.energy=Math.max(0,this.energy-dt*3);this.damage(dt*4,'Woda sięga wysoko. Kieruj się do suchego tunelu.');}
+    if(!wasRain&&this.raining)this.event('Nadchodzi deszcz. Uważaj na dolne tunele.');if(wasRain&&!this.raining){this.event('Po deszczu na powierzchni jest dużo jedzenia.');for(let i=0;i<15;i++){const x=100+this.random()*3000;this.foods.push({x,y:surface(x)-14,type:i%4?'worm':'leaf',phase:i});}}
+    this.followKids(dt);this.movePredators(dt);
+    this.preyClock=(this.preyClock||0)+dt;if(this.preyClock>.6){this.preyClock=0;for(const f of this.foods)if(f.type==='worm'&&f.y>surface(f.x)&&distance(f,this.p)<120&&this.random()<.17){const angle=Math.atan2(f.y-this.p.y,f.x-this.p.x);const nx=f.x+Math.cos(angle)*13,ny=f.y+Math.sin(angle)*13;if(!this.rockAt(nx,ny)&&this.valid(nx,ny)){f.x=nx;f.y=ny;}}}
+    this.waterClock+=dt;if(this.waterClock>.6){this.waterClock=0;this.flowWater();}this.collect();
   }
-  safeAt(x,y){return this.rooms.some(r=>r.type==='safe'&&distance(r,{x,y})<2.2);}
-  simulate(dt){
-    // Small prey escapes slowly; larvae stay near roots.
-    for(const f of this.foods){if(f.type!=='worm'||f.y<SURFACE||distance(f,this.p)>3||this.rand()>.15)continue;const dx=Math.sign(f.x-this.p.x)||1,dy=Math.sign(f.y-this.p.y);const opts=[[dx,0],[0,dy||1]];for(const [x,y] of opts){const nx=f.x+x,ny=f.y+y;if(this.valid(nx,ny)&&this.tile(nx,ny)!==4&&ny>=SURFACE&&!this.foods.some(o=>o!==f&&o.x===nx&&o.y===ny)){f.x=nx;f.y=ny;break;}}}
-    for(const e of this.predators){
-      e.clock+=dt;const d=distance(e,this.p);e.alert=0;
-      if(e.type==='fox'){
-        const hears=this.noise>.1&&this.p.y<=9&&Math.abs(e.x-this.p.x)<9;
-        if(this.p.y<SURFACE&&Math.abs(e.x-this.p.x)<13||hears){e.alert=1;if(e.clock>.65){e.clock=0;if(Math.abs(e.x-this.p.x)>.5){if(e.y>3)e.y--;else e.x+=Math.sign(this.p.x-e.x);}else if(this.p.y<=9&&e.y<this.p.y&&!this.safeAt(e.x,e.y+1)&&this.tile(e.x,e.y+1)!==4){e.y++;this.tiles[this.idx(e.x,e.y)]=5;this.noise=.6;}}}
-        else if(e.clock>1){e.clock=0;if(e.y>3)e.y--;else{e.x+=e.dir;if(e.x<3||e.x>W-4)e.dir*=-1;}}
-      }else if(e.type==='owl'){
-        if(this.p.y<SURFACE&&d<17){e.alert=1;if(e.clock>.5){e.clock=0;e.x+=Math.sign(this.p.x-e.x);e.y+=Math.sign(this.p.y-e.y);}}
-        else if(e.clock>.6){e.clock=0;e.y=1;e.x+=e.dir;if(e.x<3||e.x>W-4)e.dir*=-1;}
-      }else{
-        if(d<13)e.alert=1;
-        if(e.clock>.85){e.clock=0;let opts=[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dy])=>this.open(e.x+dx,e.y+dy)&&e.y+dy>=3&&!this.safeAt(e.x+dx,e.y+dy));if(e.alert)opts.sort((a,b)=>distance({x:e.x+a[0],y:e.y+a[1]},this.p)-distance({x:e.x+b[0],y:e.y+b[1]},this.p));else opts.sort(()=>this.rand()-.5);if(opts.length){e.x+=opts[0][0];e.y+=opts[0][1];}}
-      }
-      if(distance(e,this.p)<1&&!this.invincible&&!this.safeAt(this.p.x,this.p.y)){
-        this.health-=e.type==='owl'?40:32;this.invincible=4;this.energy=Math.max(0,this.energy-8);this.event({fox:'Lis cię dopadł! Uciekaj głębiej lub drugim wyjściem.',owl:'Sowa atakuje! Schowaj się pod ziemią.',snake:'Wąż w tunelu! Uciekaj do bezpiecznej komory.'}[e.type],'danger');
-      }
+  followKids(dt){for(const k of this.kids){if(k.state!=='follow')continue;const target=this.path[Math.min(k.pathIndex,this.path.length-1)];if(distance(k,target)<20&&k.pathIndex<this.path.length-1)k.pathIndex++;const t=this.path[Math.min(k.pathIndex,this.path.length-1)],d=distance(k,t);if(d>16){const step=Math.min(d,dt*108);const nx=k.x+(t.x-k.x)/d*step,ny=k.y+(t.y-k.y)/d*step;if(this.isOpen(nx,ny)&&!this.rockAt(nx,ny)){k.x=nx;k.y=ny;}}}}
+  movePredators(dt){for(const e of this.predators){const d=distance(e,this.p),depth=this.p.y-surface(this.p.x);e.attack=Math.max(0,e.attack-dt);e.alert=0;
+    if(e.type==='fox'){
+      const notices=depth<52&&(d<280&&this.noise>.1||this.surface&&d<360);
+      if(notices){e.alert=1;e.warning=Math.min(2,e.warning+dt);if(Math.abs(this.p.x-e.x)>22)e.x+=Math.sign(this.p.x-e.x)*dt*85;e.y=clamp(e.y+(this.p.y-e.y)*dt*2,surface(e.x)-17,surface(e.x)+35);if(e.warning>1.1&&Math.abs(this.p.x-e.x)<50&&depth<50){this.carve(e.x,surface(e.x)+20,28);if(!e.attack){e.attack=3;this.damage(28,'Lis sięga łapą do wejścia! Schowaj się głębiej.');}}}
+      else{e.warning=Math.max(0,e.warning-dt);e.x+=e.dir*dt*30;e.y=surface(e.x)-17;if(e.x<800||e.x>WIDTH-120)e.dir*=-1;}e.y=Math.min(e.y,surface(e.x)+35);
+    }else if(e.type==='owl'){
+      if(this.surface&&d<330){e.alert=1;e.warning+=dt;const a=Math.atan2(this.p.y-20-e.y,this.p.x-e.x);if(e.warning>1.4){e.x+=Math.cos(a)*dt*140;e.y+=Math.sin(a)*dt*140;}if(d<42&&!e.attack){e.attack=4;this.damage(32,'Cień sowy! Wracaj pod ziemię.');}}
+      else{e.warning=0;e.x+=e.dir*dt*50;e.y+=(surface(e.x)-135-e.y)*dt;if(e.x<800||e.x>WIDTH-150)e.dir*=-1;}
+    }else{
+      e.alert=d<310?1:0;let angle=e.alert?Math.atan2(this.p.y-e.y,this.p.x-e.x):e.angle;
+      for(const offset of [0,.5,-.5,1,-1,2,-2,Math.PI]){const a=angle+offset,nx=e.x+Math.cos(a)*dt*57,ny=e.y+Math.sin(a)*dt*57;if(this.isOpen(nx,ny)&&this.isOpen(nx+Math.cos(a)*17,ny+Math.sin(a)*17)&&!this.safeAt({x:nx,y:ny})&&!this.rockAt(nx,ny)){e.x=nx;e.y=ny;e.angle=a;break;}}if(d<32&&!e.attack){e.attack=4;this.damage(23,'Wąż w przejściu. Uciekaj albo zasyp tunel za sobą.');}
     }
-  }
+  }}
   flowWater(){
-    if(this.raining)for(let x=1;x<W-1;x++){const i=this.idx(x,4);if(this.open(x,4))this.water[i]=clamp(this.water[i]+.24,0,1);}
-    for(let y=H-2;y>=SURFACE;y--)for(let x=1;x<W-1;x++){
-      const i=this.idx(x,y);let v=this.water[i];if(v<=0)continue;
-      this.water[i]=Math.max(0,v-(this.raining?.001:.012));
-      for(const [dx,dy] of [[0,1],[-1,0],[1,0]]){const nx=x+dx,ny=y+dy,j=this.idx(nx,ny);if(!this.open(nx,ny)||ny<SURFACE)continue;const diff=dy?this.water[i]:Math.max(0,(this.water[i]-this.water[j])*.5);const amount=Math.min(diff,1-this.water[j],dy?.3:.08);this.water[i]-=amount;this.water[j]+=amount;}
-    }
-    // Each drain pumps its connected tunnel network, never through solid earth.
-    for(const d of this.drains){const queue=[[d.x,d.y,0]],visited=new Set();for(let n=0;n<queue.length;n++){const [x,y,depth]=queue[n],i=this.idx(x,y);if(visited.has(i)||depth>20||!this.open(x,y))continue;visited.add(i);this.water[i]=Math.max(0,this.water[i]-.12);for(const [dx,dy] of [[0,1],[0,-1],[1,0],[-1,0]])if(this.valid(x+dx,y+dy))queue.push([x+dx,y+dy,depth+1]);}}
+    if(this.raining)for(const x of this.exits){const y=surface(x)+12,i=this.idx(x,y);if(this.open[i])this.water[i]=clamp(this.water[i]+.23,0,1);}
+    const source=this.idx(2180,895);if(this.open[source])this.water[source]=clamp(this.water[source]+.45,0,1);
+    const indices=Array.from(this.openSet).sort((a,b)=>b-a);for(const i of indices){if(this.water[i]<.005)continue;this.water[i]=Math.max(0,this.water[i]-.0005);const x=i%COLS;for(const j of [i+COLS,i-1,i+1]){if(!this.open[j]||j<0||j>=this.open.length||j===i-1&&x===0||j===i+1&&x===COLS-1)continue;const amount=Math.min(j===i+COLS?this.water[i]:Math.max(0,(this.water[i]-this.water[j])*.5),1-this.water[j],j===i+COLS?.28:.08);this.water[i]-=amount;this.water[j]+=amount;}}
+    for(const drain of this.drains){const queue=[[this.idx(drain.x,drain.y),0]],visited=new Set();for(let n=0;n<queue.length&&n<6000;n++){const [i,depth]=queue[n];if(visited.has(i)||depth>70||!this.open[i])continue;visited.add(i);this.water[i]=Math.max(0,this.water[i]-.20);const x=i%COLS;for(const j of [i+COLS,i-COLS,x>0?i-1:-1,x<COLS-1?i+1:-1])if(j>=0&&j<this.open.length&&!visited.has(j))queue.push([j,depth+1]);}}
+    const pantry=this.rooms.find(r=>r.type==='pantry');if(pantry&&this.water[this.idx(pantry.x,pantry.y)]>.7&&this.stash>0){this.wetClock=(this.wetClock||0)+.6;if(this.wetClock>20){this.stash--;this.wetClock=0;this.event('Spiżarnia mokra. Przenieś zapasy wyżej lub zbuduj odpływ.');}}
   }
-  checkWin(){const p=this.progress;if(!this.won&&!this.dead&&p.days===3&&p.rooms===3&&p.stash===6&&p.exits===2){this.won=true;this.event('Przetrwałeś trzy dni! Twoja nora jest gotowa.','win');}}
-  save(){const keys=['seed','time','health','hunger','energy','food','wood','treasure','stash','dug','eaten','claws','found','rooms','exits','drains','won','dead','p','home','tiles','seen','water','foods','discoveries','predators'];const data={version:1};for(const k of keys)data[k]=this[k];return data;}
-  static load(data){if(data?.version!==1||data.tiles?.length!==W*H||data.seen?.length!==W*H||data.water?.length!==W*H||!Array.isArray(data.foods)||!Array.isArray(data.rooms)||!Array.isArray(data.predators))throw Error('Invalid save');const w=new World(data.seed);for(const k of Object.keys(w.save()))if(k!=='version'&&data[k]!==undefined)w[k]=data[k];if(!Number.isInteger(w.p.x)||!Number.isInteger(w.p.y)||!w.valid(w.p.x,w.p.y))throw Error('Invalid position');w.reveal();return w;}
+  save(){const keys=['seed','time','p','health','energy','hunger','food','wood','treasure','stash','claws','hearing','sprintUnlocked','downed','won','facing','dug','moved','fillCount','cuts','sight','path','exits','rooms','drains','rocks','foods','kids','discoveries','predators'];const d={version:2,seen:pack(this.seen),water:[]};for(const key of keys)d[key]=this[key];for(const i of this.openSet)if(this.water[i]>.01)d.water.push([i,Math.round(this.water[i]*100)/100]);return d;}
+  static load(d){if(d?.version!==2||!Array.isArray(d.cuts)||d.cuts.length>50000||!Array.isArray(d.kids)||d.kids.length!==3||!Number.isFinite(d.p?.x)||!Number.isFinite(d.p?.y))throw Error('Invalid save');const w=new World(d.seed);if(!w.valid(d.p.x,d.p.y))throw Error('Invalid position');for(const key of Object.keys(w.save()))if(!['version','seen','water'].includes(key)&&d[key]!==undefined)w[key]=d[key];w.open.fill(0);w.openSet.clear();for(const cut of w.cuts)w.paint(cut.x,cut.y,cut.r,cut.kind,false);w.seen=unpack(d.seen||'',COLS*ROWS);w.water.fill(0);for(const [i,v] of d.water||[])if(w.open[i])w.water[i]=clamp(v,0,1);if(!w.path?.length)w.path=[{...w.p}];w._revealX=w.p.x;w._revealY=w.p.y;return w;}
 }
