@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18231f">
+  <meta name="description" content="Zostań kretem: kop tunele, nasłuchuj drgań, zbuduj norę i przechytrz drapieżniki. Gra na komputer, telefon i tablet.">
+  <title>Kret — Podziemna przygoda</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas id="world" aria-label="Świat gry w przekroju ziemi. Steruj strzałkami lub joystickiem." tabindex="0"></canvas>
+  <header class="hud hidden" id="hud">
+    <div class="brand"><img src="./icon.svg" alt="" width="38" height="38"><div><b>KRET</b><small>Podziemna przygoda</small></div></div>
+    <div class="stats">
+      <div class="meter health"><span>♥ <span class="stat-name">Zdrowie</span></span><progress id="health" max="100" value="100"></progress></div>
+      <div class="meter hunger"><span>◉ <span class="stat-name">Sytość</span></span><progress id="hunger" max="100" value="100"></progress></div>
+      <div class="meter energy"><span>ϟ <span class="stat-name">Energia</span></span><progress id="energy" max="100" value="100"></progress></div>
+    </div>
+    <button class="icon-btn" id="pause" aria-label="Pauza i pomoc">Ⅱ</button>
+  </header>
+  <aside id="journey" class="journey hidden"><span id="day">Dzień 1 / 3</span><span id="weather">☀ Spokojnie</span><div class="daybar"><i id="daybar"></i></div><p id="objective"></p></aside>
+  <div id="bag" class="bag hidden"><span id="food">🪱 0</span><span id="wood">🌿 0</span><span id="treasure">✦ 0</span><button id="map" title="Mapa odkrytych tuneli (M)" aria-label="Mapa odkrytych tuneli">⌖</button></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="context" class="context hidden"></div>
+  <div id="controls" class="controls hidden">
+    <div class="joystick" id="joystick" aria-label="Joystick dotykowy"><div class="joystick-cross">＋</div><div id="stick"></div></div>
+    <div class="actions">
+      <button id="listen" class="action listen"><span>◎</span>Nasłuch<span class="key">Spacja</span></button>
+      <button id="eat" class="action"><span>🪱</span>Zjedz<span class="key">Q</span></button>
+      <button id="build" class="action"><span>⌂</span>Nora<span class="key">E</span></button>
+    </div>
+  </div>
+  <div id="map-panel" class="map-panel hidden"><div><b>Twoje podziemia</b><button id="close-map" aria-label="Zamknij mapę">×</button></div><canvas id="minimap" width="432" height="216"></canvas><p>Odkryte tunele zostają na mapie. Złoty punkt to ty; zielony — nora.</p></div>
+  <section class="overlay" id="menu" aria-label="Menu gry">
+    <div class="menu-card">
+      <div class="eyebrow">MAŁY KRET. WIELKI ŚWIAT.</div>
+      <img class="hero-icon" src="./icon.svg" alt="Rysowany kret z różowym nosem">
+      <h1>Kret<span>Podziemna przygoda</span></h1>
+      <p class="intro">Pod ziemią jesteś u siebie.<br>Nad ziemią… lepiej słuchaj uważnie.</p>
+      <div class="menu-buttons"><button id="start" class="primary">Zacznij przygodę <span>→</span></button><button id="continue" class="secondary hidden">Wróć do swojej nory</button></div>
+      <div class="menu-facts"><span>◎ Odkrywaj po drganiach</span><span>⌂ Zbuduj własną norę</span><span>☂ Przetrwaj trzy dni</span></div>
+      <button id="help" class="text-btn">Jak grać?</button><a class="back-link" href="../">Pozostałe gry ↗</a>
+    </div>
+  </section>
+  <section id="modal" class="overlay hidden" aria-label="Panel gry"><div class="panel"><button id="modal-close" class="close" aria-label="Zamknij">×</button><div id="modal-content"></div></div></section>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>

@@ -10,5 +10,11 @@
     "title": "Goat Simulator — Kozi Raj",
     "description": "Zwiedzaj farmę, podjadaj lody i przechytrz koziego strażnika. Trenuj na siłowni, aby odblokować miasto.",
     "icon": "goat-simulator/icon.png"
+  },
+  {
+    "icon": "kret/icon.svg",
+    "title": "Kret — Podziemna przygoda",
+    "slug": "kret",
+    "description": "Kop tunele, nasłuchuj drgań, urządź norę i przetrwaj spotkania z drapieżnikami. Na telefon, tablet i komputer."
   }
 ]
