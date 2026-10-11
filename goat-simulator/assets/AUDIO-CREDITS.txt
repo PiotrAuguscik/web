@@ -1,0 +1,35 @@
+Recorded sound effects included in Goat Simulator — Kozi Raj
+
+goat-bleat.mp3
+"1202_goat.wav" by reinsamba
+Source: https://freesound.org/people/reinsamba/sounds/57794/
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+Downloaded as the Freesound HQ MP3 preview of the original recording.
+The recording is played with a volume envelope; no sound synthesis substitutes for it.
+
+burp.mp3
+"Cool Burp" by qubodup
+Source: https://freesound.org/people/qubodup/sounds/614530/
+License: Creative Commons Zero 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/
+Downloaded as the Freesound HQ MP3 preview of the original recording.
+
+Additional sound recordings (CC0 1.0 Universal):
+
+chew.mp3 — "Disgusting Chewing.wav" by Breviceps
+https://freesound.org/people/Breviceps/sounds/447916/
+Used as a short excerpt with a volume envelope.
+
+growl.mp3 — "Growling stomach / Stomach rumbles" by Breviceps
+https://freesound.org/people/Breviceps/sounds/447911/
+Playback volume, excerpt duration and rate vary with hunger.
+
+fart.mp3 — "Fart 2" by Breviceps
+https://freesound.org/people/Breviceps/sounds/445999/
+
+death.mp3 — "wah wah sad trombone.wav" by kirbydx
+https://freesound.org/people/kirbydx/sounds/175409/
+
+All downloaded as public HQ MP3 previews.
+License: https://creativecommons.org/publicdomain/zero/1.0/
