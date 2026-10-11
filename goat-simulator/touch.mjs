@@ -1,5 +1,26 @@
 // An analogue stick with a dead zone and one captured finger. Other fingers
 // remain free to use action buttons or drag the camera.
+export function usesTouchLayout({mode='auto',touchPoints=0,coarsePointer=false,width,height}){
+ if(mode==='touch')return true;
+ if(mode==='keyboard')return false;
+ return touchPoints>0||coarsePointer||width<=600||(height<=500&&width<=1000);
+}
+
+export function attachTouchLayout(element,select,onChange=()=>{}){
+ const coarse=matchMedia('(any-pointer: coarse)');
+ const update=()=>{
+  element.classList.toggle('touch-layout',usesTouchLayout({
+   mode:select.value,touchPoints:navigator.maxTouchPoints||0,
+   coarsePointer:coarse.matches,width:innerWidth,height:innerHeight
+  }));
+  onChange();
+ };
+ select.addEventListener('change',update);
+ coarse.addEventListener('change',update);
+ addEventListener('resize',update);
+ update();
+}
+
 export function joystickVector(dx,dy,radius,deadZone=.12){
  const distance=Math.hypot(dx,dy);
  const travel=Math.min(distance,Math.max(1,radius));

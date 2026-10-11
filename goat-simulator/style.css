@@ -16,45 +16,63 @@
 .joystick.active{border-color:#dce9b1b3}.joystick.running .joystick-knob{background:#dce9b1ba}
 .joystick-label{position:absolute;bottom:-17px;font-size:8px;letter-spacing:1.3px;color:#eff4dcad;pointer-events:none}.joystick-label::after{content:'RUCH'}.joystick.running .joystick-label::after{content:'BIEG';color:var(--lime)}
 
-/* Small touch screens, including phones held horizontally. Graphic quality
-   remains independent from the interface layout. */
-@media(max-width:600px),(pointer:coarse) and (max-width:1100px),(max-height:500px) and (max-width:1000px){
- :root{--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
- html,body{height:100dvh;overscroll-behavior:none}
- header{top:calc(10px + var(--safe-top));left:calc(12px + var(--safe-left));right:calc(12px + var(--safe-right))}
- .top-actions{gap:5px}.top-actions button{width:38px;height:38px;font-size:19px}.weather{display:none}
- body.playing .brand div{display:none}body.playing .brand svg{width:27px;height:32px}
- #hud{pointer-events:none}.slots button,#touch button{pointer-events:auto}
- .energy{top:calc(60px + var(--safe-top));left:calc(12px + var(--safe-left));bottom:auto;width:132px;padding:9px;border-radius:10px}
- .energy-top>span{font-size:8px;letter-spacing:1px}.energy-top strong{font-size:18px;line-height:20px}.energy-top small{font-size:9px}
- .energy-track{height:4px;margin-top:6px}.energy p,.energy .stats{display:none}
- .training-levels{margin-top:7px;padding-top:7px;gap:4px}.skill-row{font-size:8px;line-height:11px}.stars{font-size:11px;gap:3px}
- .level-progress{font-size:8px;letter-spacing:0;line-height:11px;margin-top:7px;padding-top:6px;white-space:nowrap}
- .quest{top:calc(60px + var(--safe-top));right:calc(12px + var(--safe-right));width:min(150px,calc(100vw - 180px));padding:9px;border-radius:10px}
- .quest .eyebrow,.quest p{display:none}.quest h2{font-size:14px;line-height:18px;margin:0 0 4px}.quest-progress{margin:0;padding:0;border:0;font-size:9px;line-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
- .inventory{right:calc(12px + var(--safe-right));bottom:calc(132px + var(--safe-bottom))}.inventory-title{display:none}
- .slots{gap:6px}.slots button{width:48px;height:44px;padding:3px;border-radius:10px}.slots kbd,.slots small{display:none}
- .item-icon{font-size:25px;line-height:35px;margin:0}.slots b{font-size:9px;right:4px;top:3px;background:#20311cbb;border-radius:6px;min-width:13px;padding:1px}
- .controls,.location{display:none}
- #touch{display:flex;position:absolute;left:calc(17px + var(--safe-left));right:calc(12px + var(--safe-right));bottom:calc(27px + var(--safe-bottom));justify-content:space-between;align-items:flex-end;pointer-events:none}
- .touch-actions{display:grid;grid-template-columns:repeat(3,48px);gap:6px;pointer-events:none}
- .touch-actions button{height:47px;min-width:0;border:1px solid #e9f1cf55;background:#20301ebf;border-radius:12px;backdrop-filter:blur(7px);font-size:9px;touch-action:none;user-select:none;-webkit-user-select:none;padding:3px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px}
- .touch-actions button>span:first-child{font-size:21px;line-height:23px}.touch-actions .action-primary{grid-column:span 2;flex-direction:row;gap:7px;font-size:12px;color:#e5f0bd;background:#415235c7;border-color:#dce9b184}
- .touch-actions button:active{background:#5a714ccc}.touch-actions button:disabled{cursor:default;opacity:.4}
- #prompt{top:auto;bottom:calc(188px + var(--safe-bottom));left:50%;max-width:calc(100vw - 32px);width:max-content;padding:8px 12px;font-size:10px;transform:translateX(-50%);pointer-events:none}#prompt kbd{display:none}
- #toast{top:calc(208px + var(--safe-top));left:50%;transform:translateX(-50%);max-width:300px;width:max-content;max-width:min(300px,calc(100vw - 32px));padding:8px 12px;font-size:11px;line-height:1.45}
- #guard-alert{top:calc(180px + var(--safe-top));left:50%;font-size:10px;white-space:nowrap;padding:6px 10px}
- .modal{padding:calc(12px + var(--safe-top)) calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left))}
- .modal-card{max-height:100%;overflow-y:auto;overscroll-behavior:contain;width:min(450px,100%);padding:22px}.modal-card h2{font-size:28px;margin:13px 0}.modal-card p{font-size:11px;line-height:1.65}
- .modal-card .desktop-help{display:none}.modal-card .mobile-help{display:block}.modal-card #paused-mission{font-size:10px;color:#dae9a1}
- .start-foot{left:calc(20px + var(--safe-left));bottom:calc(14px + var(--safe-bottom))}.postcard{display:none}
+/* Touch layout follows device capabilities, including large tablets and
+   tablets with a connected mouse. The pause menu can override detection. */
+
+:root.touch-layout{--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+html.touch-layout,.touch-layout body{height:100dvh;overscroll-behavior:none}
+.touch-layout header{top:calc(10px + var(--safe-top));left:calc(12px + var(--safe-left));right:calc(12px + var(--safe-right))}
+.touch-layout .top-actions{gap:5px}
+.touch-layout .top-actions button{width:38px;height:38px;font-size:19px}
+.touch-layout .weather{display:none}
+.touch-layout body.playing .brand div{display:none}
+.touch-layout body.playing .brand svg{width:27px;height:32px}
+.touch-layout #hud{pointer-events:none}
+.touch-layout .slots button,.touch-layout #touch button{pointer-events:auto}
+.touch-layout .energy{top:calc(60px + var(--safe-top));left:calc(12px + var(--safe-left));bottom:auto;width:132px;padding:9px;border-radius:10px}
+.touch-layout .energy-top>span{font-size:8px;letter-spacing:1px}
+.touch-layout .energy-top strong{font-size:18px;line-height:20px}
+.touch-layout .energy-top small{font-size:9px}
+.touch-layout .energy-track{height:4px;margin-top:6px}
+.touch-layout .energy p,.touch-layout .energy .stats{display:none}
+.touch-layout .training-levels{margin-top:7px;padding-top:7px;gap:4px}
+.touch-layout .skill-row{font-size:8px;line-height:11px}
+.touch-layout .stars{font-size:11px;gap:3px}
+.touch-layout .level-progress{font-size:8px;letter-spacing:0;line-height:11px;margin-top:7px;padding-top:6px;white-space:nowrap}
+.touch-layout .quest{top:calc(60px + var(--safe-top));right:calc(12px + var(--safe-right));width:min(150px,calc(100vw - 180px));padding:9px;border-radius:10px}
+.touch-layout .quest .eyebrow,.touch-layout .quest p{display:none}
+.touch-layout .quest h2{font-size:14px;line-height:18px;margin:0 0 4px}
+.touch-layout .quest-progress{margin:0;padding:0;border:0;font-size:9px;line-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.touch-layout .inventory{right:calc(12px + var(--safe-right));bottom:calc(132px + var(--safe-bottom))}
+.touch-layout .inventory-title{display:none}
+.touch-layout .slots{gap:6px}
+.touch-layout .slots button{width:48px;height:44px;padding:3px;border-radius:10px}
+.touch-layout .slots kbd,.touch-layout .slots small{display:none}
+.touch-layout .item-icon{font-size:25px;line-height:35px;margin:0}
+.touch-layout .slots b{font-size:9px;right:4px;top:3px;background:#20311cbb;border-radius:6px;min-width:13px;padding:1px}
+.touch-layout .controls,.touch-layout .location{display:none}
+.touch-layout #touch{display:flex;position:absolute;left:calc(17px + var(--safe-left));right:calc(12px + var(--safe-right));bottom:calc(27px + var(--safe-bottom));justify-content:space-between;align-items:flex-end;pointer-events:none}
+.touch-layout .touch-actions{display:grid;grid-template-columns:repeat(3,48px);gap:6px;pointer-events:none}
+.touch-layout .touch-actions button{height:47px;min-width:0;border:1px solid #e9f1cf55;background:#20301ebf;border-radius:12px;backdrop-filter:blur(7px);font-size:9px;touch-action:none;user-select:none;-webkit-user-select:none;padding:3px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px}
+.touch-layout .touch-actions button>span:first-child{font-size:21px;line-height:23px}
+.touch-layout .touch-actions .action-primary{grid-column:span 2;flex-direction:row;gap:7px;font-size:12px;color:#e5f0bd;background:#415235c7;border-color:#dce9b184}
+.touch-layout .touch-actions button:active{background:#5a714ccc}
+.touch-layout .touch-actions button:disabled{cursor:default;opacity:.4}
+.touch-layout #prompt{top:auto;bottom:calc(188px + var(--safe-bottom));left:50%;max-width:calc(100vw - 32px);width:max-content;padding:8px 12px;font-size:10px;transform:translateX(-50%);pointer-events:none}
+.touch-layout #prompt kbd{display:none}
+.touch-layout #toast{top:calc(208px + var(--safe-top));left:50%;transform:translateX(-50%);max-width:300px;width:max-content;max-width:min(300px,calc(100vw - 32px));padding:8px 12px;font-size:11px;line-height:1.45}
+.touch-layout #guard-alert{top:calc(180px + var(--safe-top));left:50%;font-size:10px;white-space:nowrap;padding:6px 10px}
+.touch-layout .modal{padding:calc(12px + var(--safe-top)) calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left))}
+.touch-layout .modal-card{max-height:100%;overflow-y:auto;overscroll-behavior:contain;width:min(450px,100%);padding:22px}
+.touch-layout .modal-card h2{font-size:28px;margin:13px 0}
+.touch-layout .modal-card p{font-size:11px;line-height:1.65}
+.touch-layout .modal-card .desktop-help{display:none}
+.touch-layout .modal-card .mobile-help{display:block}
+.touch-layout .modal-card #paused-mission{font-size:10px;color:#dae9a1}
+.touch-layout .start-foot{left:calc(20px + var(--safe-left));bottom:calc(14px + var(--safe-bottom))}
+.touch-layout .postcard{display:none}
+
+@media(max-height:500px) and (max-width:1100px){.touch-layout .intro{top:50%;left:6%;transform:translateY(-46%)}.touch-layout h1{font-size:44px;margin:10px 0 12px}.touch-layout .intro p{font-size:11px;line-height:1.5;margin:0 0 14px}.touch-layout .intro .eyebrow{font-size:8px}.touch-layout .intro .primary{padding:12px 20px;min-width:220px}.touch-layout .intro-note,.touch-layout .start-foot{display:none}.touch-layout #toast{top:calc(98px + var(--safe-top));max-width:min(290px,calc(100vw - 324px))}.touch-layout #guard-alert{top:calc(60px + var(--safe-top))}.touch-layout #prompt{bottom:calc(20px + var(--safe-bottom));max-width:calc(100vw - 350px)}.touch-layout .modal-card{padding:18px}.touch-layout .modal-card h2{font-size:24px;margin:10px 0}.touch-layout .modal-card .primary{padding:13px 20px}.touch-layout .modal-card label{margin:12px 0}
 }
-@media(max-height:500px) and (max-width:1100px){
- .intro{top:50%;left:6%;transform:translateY(-46%)}h1{font-size:44px;margin:10px 0 12px}.intro p{font-size:11px;line-height:1.5;margin:0 0 14px}.intro .eyebrow{font-size:8px}.intro .primary{padding:12px 20px;min-width:220px}.intro-note,.start-foot{display:none}
- #toast{top:calc(98px + var(--safe-top));max-width:min(290px,calc(100vw - 324px))}#guard-alert{top:calc(60px + var(--safe-top))}
- #prompt{bottom:calc(20px + var(--safe-bottom));max-width:calc(100vw - 350px)}
- .modal-card{padding:18px}.modal-card h2{font-size:24px;margin:10px 0}.modal-card .primary{padding:13px 20px}.modal-card label{margin:12px 0}
-}
-@media(max-height:350px) and (max-width:1100px){
- .energy,.quest{top:calc(52px + var(--safe-top))}.energy{padding:7px}.training-levels{gap:2px;margin-top:5px;padding-top:4px}.skill-row{line-height:10px}.energy .level-progress{display:none}
+@media(max-height:350px) and (max-width:1100px){.touch-layout .energy,.touch-layout .quest{top:calc(52px + var(--safe-top))}.touch-layout .energy{padding:7px}.touch-layout .training-levels{gap:2px;margin-top:5px;padding-top:4px}.touch-layout .skill-row{line-height:10px}.touch-layout .energy .level-progress{display:none}
 }

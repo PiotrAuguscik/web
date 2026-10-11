@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import {attachJoystick} from './touch.mjs';
+import {attachJoystick,attachTouchLayout} from './touch.mjs?v=tablet-joystick-1';
 import {RecordedAudio,loadRecordings} from './audio.mjs';
 import {mealReaction,HungerAudioClock} from './reactions.mjs';
 import {buildCity} from './city.mjs';
@@ -163,6 +163,7 @@ let vy=0,jumpY=0,hitCooldown=0,velocity=new THREE.Vector3(),nearest=null,toastTi
 let training=null,supplyCooldown=0;const explored=new Set();let audio=null,soundOn=true;const keys=new Set();const projectiles=[];
 let joystickInput={forward:0,side:0,strength:0};
 const touchControl=attachJoystick($('#joystick'),value=>joystickInput=value,()=>playing&&!paused&&!sleeping);
+attachTouchLayout(document.documentElement,$('#input-mode'),()=>touchControl.reset());
 const markers=[{name:'Zielona łąka',x:0,z:17,r:25},{name:'Lodowy stragan',x:8,z:-16,r:13},{name:'Kaczy staw',x:27,z:-8,r:15},{name:'Kozia siłownia',x:-13,z:21,r:12}];
 function toast(s,d=3.5){$('#toast').textContent=s;$('#toast').classList.add('visible');toastTimer=d;}
 function sound(kind='bleat',delay=0,options={}){if(!soundOn)return;if(['bleat','burp','chew','growl','fart','death'].includes(kind)){recordedAudio.play(kind,delay,options).catch(()=>toast('Nie udało się odtworzyć dźwięku. Odśwież grę.',3));return;}if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();audio.resume();const o=audio.createOscillator(),gain=audio.createGain();o.connect(gain);gain.connect(audio.destination);const now=audio.currentTime;o.type=kind==='duck'?'square':'sawtooth';const freq=kind==='duck'?600:kind==='eat'?360:kind==='throw'?130:kind==='hit'?80:180;const len=.22;o.frequency.setValueAtTime(freq,now);o.frequency.exponentialRampToValueAtTime(freq*.48,now+len);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(kind==='duck'?.035:.055,now+.025);gain.gain.exponentialRampToValueAtTime(.0001,now+len);o.start(now);o.stop(now+len);}
