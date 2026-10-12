@@ -16,5 +16,11 @@
     "title": "Kret — Zaginiona rodzina",
     "slug": "kret",
     "description": "Kop swobodne, kręte tunele i sprowadź rodzinę do domu. Pięć podziemnych krain, odkrycia i przygoda na telefon, tablet i komputer."
+  },
+  {
+    "slug": "smocza-dolina",
+    "title": "Smocza Dolina — Zaginione jajka",
+    "description": "Lataj nad doliną, ziej ogniem i lodem, zbierz 8 jajek w chmurach i zaprzyjaźnij się ze smokiem Luną.",
+    "icon": "smocza-dolina/icon.svg"
   }
 ]
