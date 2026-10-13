@@ -34,8 +34,8 @@ export class FlightMotion {
 }
 
 export class FlightInput {
- constructor({canvas,document:doc,window:win,keys,active,onPause,onMode}){
-  this.canvas=canvas;this.doc=doc;this.win=win;this.keys=keys;this.active=active;this.onPause=onPause;this.onMode=onMode;
+ constructor({canvas,document:doc,window:win,keys,active,onPause,onMode,onCapture}){
+  this.canvas=canvas;this.doc=doc;this.win=win;this.keys=keys;this.active=active;this.onPause=onPause;this.onMode=onMode;this.onCapture=onCapture;
   this.heading=0;this.pitch=0;this.lastMouse=null;this.mouseThrust=false;this.mouseBrake=false;this.stick={x:0,y:0};this.held=new Map();this.releases=new Set();this.choice='auto';this.mode='mouse';this.wasLocked=false;this.swapped=false;this.element='fire';
   this.touchCapable=(win.navigator?.maxTouchPoints||0)>0||!!win.matchMedia?.('(any-pointer: coarse)').matches;
   this.showTouch=this.touchCapable;
@@ -45,12 +45,14 @@ export class FlightInput {
    this.lastMouse={x:e.clientX,y:e.clientY};if(e.button===0)this.mouseThrust=true;if(e.button===2)this.mouseBrake=true;
    this.captureMouse();
   });
-  canvas.addEventListener('mousedown',e=>{if(doc.pointerLockElement!==canvas||!active()||this.choice==='touch')return;e.preventDefault();if(e.button===0)this.mouseThrust=true;if(e.button===2)this.mouseBrake=true;});
+  canvas.addEventListener('mousedown',e=>{if(!active()||this.choice==='touch'||e.sourceCapabilities?.firesTouchEvents)return;e.preventDefault();this.setMode('mouse');if(e.button===0)this.mouseThrust=true;if(e.button===2)this.mouseBrake=true;this.captureMouse();});
+  // Some hosts accept capture on the completed click rather than pointerdown.
+  canvas.addEventListener('click',e=>{if(e.pointerType!=='touch'&&!e.sourceCapabilities?.firesTouchEvents)this.captureMouse();});
   doc.addEventListener('mousemove',e=>{
    if(!active()||this.mode!=='mouse'||this.choice==='touch'||e.sourceCapabilities?.firesTouchEvents)return;
    let dx=0,dy=0;
    if(doc.pointerLockElement===canvas){dx=Number(e.movementX)||0;dy=Number(e.movementY)||0;}
-   else if(e.target===canvas){if(this.lastMouse){dx=e.clientX-this.lastMouse.x;dy=e.clientY-this.lastMouse.y;}this.lastMouse={x:e.clientX,y:e.clientY};}
+   else if(e.target===canvas){if(e.clientX<16||e.clientY<16||e.clientX>win.innerWidth-16||e.clientY>win.innerHeight-16){this.mouseThrust=this.mouseBrake=false;this.lastMouse=null;this.onPause();return;}if(this.lastMouse){dx=e.clientX-this.lastMouse.x;dy=e.clientY-this.lastMouse.y;}this.lastMouse={x:e.clientX,y:e.clientY};}
    else {this.lastMouse=null;return;}
    this.heading-=dx*.0032;this.pitch=clamp(this.pitch-dy*.0026,-.8,.7);
   });
@@ -59,15 +61,17 @@ export class FlightInput {
   doc.addEventListener('mouseout',e=>{if(e.relatedTarget==null&&doc.pointerLockElement!==canvas&&active()&&this.mode==='mouse'&&this.choice!=='touch'){this.mouseThrust=this.mouseBrake=false;this.lastMouse=null;this.onPause();}});
   const mouseUp=e=>{if(e.pointerType==='touch')return;if(e.button===0)this.mouseThrust=false;if(e.button===2)this.mouseBrake=false;};
   doc.addEventListener('pointerup',mouseUp);doc.addEventListener('mouseup',mouseUp);doc.addEventListener('pointercancel',e=>{if(e.pointerType!=='touch')this.mouseThrust=this.mouseBrake=false;});
-  doc.addEventListener('pointerlockchange',()=>{this.capturePending=false;const locked=doc.pointerLockElement===canvas;if(locked)this.lastMouse=null;if(this.wasLocked&&!locked){this.mouseThrust=this.mouseBrake=false;if(active())onPause();}this.wasLocked=locked;});
-  doc.addEventListener('pointerlockerror',()=>this.capturePending=false);
+  doc.addEventListener('pointerlockchange',()=>{this.capturePending=false;const locked=doc.pointerLockElement===canvas;if(locked){this.lastMouse=null;this.captureError=null;this.onCapture?.('locked');}if(this.wasLocked&&!locked){this.mouseThrust=this.mouseBrake=false;if(active())onPause();}this.wasLocked=locked;});
+  doc.addEventListener('pointerlockerror',()=>this.captureFailed());
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
  }
  captureMouse(){
-  if(!this.active()||this.choice==='touch'||this.mode==='touch'||this.doc.pointerLockElement||this.capturePending||!this.canvas.requestPointerLock)return;
+  if(!this.active()||this.choice==='touch'||this.mode==='touch'&&this.choice!=='mouse'||this.doc.pointerLockElement||this.capturePending)return;
+  if(!this.canvas.requestPointerLock){this.captureFailed({name:'NotSupportedError'});return;}
   this.canvas.focus({preventScroll:true});this.capturePending=true;
-  try{const request=this.canvas.requestPointerLock();request?.catch?.(()=>{this.capturePending=false;});}catch{this.capturePending=false;}
+  try{const request=this.canvas.requestPointerLock();request?.catch?.(error=>this.captureFailed(error));}catch(error){this.captureFailed(error);}
  }
+ captureFailed(error){if(this.doc.pointerLockElement===this.canvas)return;this.capturePending=false;this.captureError=error?.name||'PointerLockError';this.onCapture?.('free',this.captureError);}
  setMode(mode){if(this.mode===mode)return;this.mode=mode;if(this.choice==='auto'&&mode==='touch')this.showTouch=true;this.onMode?.();}
  setChoice(choice){this.choice=choice;this.showTouch=choice==='touch'||choice==='auto'&&this.touchCapable;this.reset(this.heading,this.pitch,true);this.onMode?.();}
  reset(heading=this.heading,pitch=0,unlock=false){for(const release of [...this.releases])release();this.held.clear();this.stick={x:0,y:0};this.keys.clear();this.mouseThrust=this.mouseBrake=false;this.lastMouse=null;this.heading=heading;this.pitch=pitch;if(unlock&&this.doc.pointerLockElement===this.canvas)this.doc.exitPointerLock?.();}
