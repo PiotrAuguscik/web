@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import { FlightInput, FlightMotion, angleDelta, reticleOffset } from './flight.mjs?v=8';
+import { FlightInput, FlightMotion, angleDelta, reticleOffset } from './flight.mjs?v=9';
 
 const $=id=>document.getElementById(id), clamp=THREE.MathUtils.clamp, lerp=THREE.MathUtils.lerp;
 const TAU=Math.PI*2, STORE='smocza-dolina-v1', keys=new Set();
@@ -123,7 +123,9 @@ function updateFlightAim(){
  document.body.classList.toggle('mouse-flight',steering&&!touch);
  document.body.classList.toggle('mouse-free',false);
  $('mouseHint').hidden=!active||locked||touch;
- $('mouseHint').textContent='Mysz — kierunek · LPM — leć · puść — szybuj · H — menu';
+ const edge=input.edgeSteering;
+ $('flightAim').querySelector('span').textContent=Math.abs(edge.x)>.05?(edge.x>0?'SKRĘT W PRAWO':'SKRĘT W LEWO'):Math.abs(edge.y)>.05?(edge.y<0?'WZNOSZENIE':'OPADANIE'):'KIERUNEK LOTU';
+ $('mouseHint').textContent=Math.abs(edge.x)>.05||Math.abs(edge.y)>.05?'Przy krawędzi skręcasz dalej · odsuń mysz od krawędzi, aby lecieć prosto':'Mysz — kierunek · LPM — leć · puść — szybuj · H — menu';
  if(!steering)return;
  const aim=reticleOffset(input.heading,motion.grounded?viewHeading:state.heading,input.pitch,motion.grounded?input.pitch:motion.pitch);
  $('flightAim').style.transform='translate3d('+(innerWidth*(.5+aim.x))+'px,'+(innerHeight*(.5+aim.y))+'px,0) translate(-50%,-50%)';
