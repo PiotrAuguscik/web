@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import { FlightInput, FlightMotion, angleDelta, reticleOffset } from './flight.mjs?v=6';
+import { FlightInput, FlightMotion, angleDelta, reticleOffset } from './flight.mjs?v=7';
 
 const $=id=>document.getElementById(id), clamp=THREE.MathUtils.clamp, lerp=THREE.MathUtils.lerp;
 const TAU=Math.PI*2, STORE='smocza-dolina-v1', keys=new Set();

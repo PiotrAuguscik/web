@@ -48,14 +48,18 @@ export class FlightInput {
   canvas.addEventListener('mousedown',e=>{if(!active()||this.choice==='touch'||e.sourceCapabilities?.firesTouchEvents)return;e.preventDefault();this.setMode('mouse');if(e.button===0)this.mouseThrust=true;if(e.button===2)this.mouseBrake=true;this.captureMouse();});
   // Some hosts accept capture on the completed click rather than pointerdown.
   canvas.addEventListener('click',e=>{if(e.pointerType!=='touch'&&!e.sourceCapabilities?.firesTouchEvents)this.captureMouse();});
-  doc.addEventListener('mousemove',e=>{
+  const moveMouse=e=>{
    if(!active()||this.mode!=='mouse'||this.choice==='touch'||e.sourceCapabilities?.firesTouchEvents)return;
    let dx=0,dy=0;
    if(doc.pointerLockElement===canvas){dx=Number(e.movementX)||0;dy=Number(e.movementY)||0;}
    else if(e.target===canvas){if(e.clientX<16||e.clientY<16||e.clientX>win.innerWidth-16||e.clientY>win.innerHeight-16){this.mouseThrust=this.mouseBrake=false;this.lastMouse=null;this.onPause();return;}if(this.lastMouse){dx=e.clientX-this.lastMouse.x;dy=e.clientY-this.lastMouse.y;}this.lastMouse={x:e.clientX,y:e.clientY};}
    else {this.lastMouse=null;return;}
    this.heading-=dx*.0032;this.pitch=clamp(this.pitch-dy*.0026,-.8,.7);
-  });
+  };
+  doc.addEventListener('mousemove',moveMouse);
+  // Free-cursor pointer events also cover hosts that omit compatibility mousemove during a drag.
+  // Same coordinates produce a zero delta when both event families are delivered.
+  doc.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&doc.pointerLockElement!==canvas)moveMouse(e);});
   canvas.addEventListener('pointerleave',e=>{this.lastMouse=null;if(doc.pointerLockElement!==canvas&&active()&&this.mode==='mouse'&&this.choice!=='touch'&&(e.clientX<=0||e.clientY<=0||e.clientX>=win.innerWidth-1||e.clientY>=win.innerHeight-1))this.onPause();});
   // Without capture, leaving the browser must never leave a held throttle running.
   doc.addEventListener('mouseout',e=>{if(e.relatedTarget==null&&doc.pointerLockElement!==canvas&&active()&&this.mode==='mouse'&&this.choice!=='touch'){this.mouseThrust=this.mouseBrake=false;this.lastMouse=null;this.onPause();}});
