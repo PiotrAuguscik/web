@@ -45,6 +45,7 @@ export class FlightInput {
    this.lastMouse={x:e.clientX,y:e.clientY};if(e.button===0)this.mouseThrust=true;if(e.button===2)this.mouseBrake=true;
    if(!doc.pointerLockElement){try{const p=canvas.requestPointerLock?.();p?.catch?.(()=>{});}catch{}}
   });
+  canvas.addEventListener('mousedown',e=>{if(doc.pointerLockElement!==canvas||!active()||this.choice==='touch')return;e.preventDefault();if(e.button===0)this.mouseThrust=true;if(e.button===2)this.mouseBrake=true;});
   doc.addEventListener('mousemove',e=>{
    if(!active()||this.mode!=='mouse'||this.choice==='touch'||e.sourceCapabilities?.firesTouchEvents)return;
    let dx=0,dy=0;
@@ -55,7 +56,7 @@ export class FlightInput {
   });
   canvas.addEventListener('pointerleave',()=>this.lastMouse=null);
   const mouseUp=e=>{if(e.pointerType==='touch')return;if(e.button===0)this.mouseThrust=false;if(e.button===2)this.mouseBrake=false;};
-  doc.addEventListener('pointerup',mouseUp);doc.addEventListener('pointercancel',()=>{this.mouseThrust=this.mouseBrake=false;});
+  doc.addEventListener('pointerup',mouseUp);doc.addEventListener('mouseup',mouseUp);doc.addEventListener('pointercancel',e=>{if(e.pointerType!=='touch')this.mouseThrust=this.mouseBrake=false;});
   doc.addEventListener('pointerlockchange',()=>{const locked=doc.pointerLockElement===canvas;if(this.wasLocked&&!locked){this.mouseThrust=this.mouseBrake=false;if(active())onPause();}this.wasLocked=locked;});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
  }
