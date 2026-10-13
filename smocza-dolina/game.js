@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import { FlightInput, FlightMotion, angleDelta, reticleOffset } from './flight.mjs?v=7';
+import { FlightInput, FlightMotion, angleDelta, reticleOffset } from './flight.mjs?v=8';
 
 const $=id=>document.getElementById(id), clamp=THREE.MathUtils.clamp, lerp=THREE.MathUtils.lerp;
 const TAU=Math.PI*2, STORE='smocza-dolina-v1', keys=new Set();
@@ -118,13 +118,13 @@ function saveControls(){try{localStorage.setItem('smocza-dolina-controls-v1',JSO
 function mobileAction(){if(!state.friend&&state.carrying&&dragon.root.position.distanceTo(friend.root.position)<11)give();else eat();}
 function updateFlightAim(){
  const active=state.started&&!state.paused,locked=document.pointerLockElement===$('world'),touch=input.choice==='touch'||input.mode==='touch'&&input.choice!=='mouse';
- // Only one steering cursor: native when free; the course reticle when captured or using touch.
- $('flightAim').hidden=!active||!locked&&!touch;
- document.body.classList.toggle('mouse-flight',active&&locked&&!touch);
- document.body.classList.toggle('mouse-free',active&&!locked&&!touch);
+ // The course reticle remains centered on straight flight, including uncaptured mouse flight.
+ const steering=active&&(touch||locked||!input.overUI);$('flightAim').hidden=!steering;
+ document.body.classList.toggle('mouse-flight',steering&&!touch);
+ document.body.classList.toggle('mouse-free',false);
  $('mouseHint').hidden=!active||locked||touch;
- $('mouseHint').textContent=input.captureError?'Mysz swobodna — przeglądarka nie przejęła myszy · kliknij, aby spróbować ponownie':'Kliknij, aby przejąć mysz · Esc — pauza';
- if(!active||!locked&&!touch)return;
+ $('mouseHint').textContent='Mysz — kierunek · LPM — leć · puść — szybuj · H — menu';
+ if(!steering)return;
  const aim=reticleOffset(input.heading,motion.grounded?viewHeading:state.heading,input.pitch,motion.grounded?input.pitch:motion.pitch);
  $('flightAim').style.transform='translate3d('+(innerWidth*(.5+aim.x))+'px,'+(innerHeight*(.5+aim.y))+'px,0) translate(-50%,-50%)';
 }
