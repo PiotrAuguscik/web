@@ -32,10 +32,11 @@ export class VoxelWorld{
  load(changes){if(!Array.isArray(changes))return;for(const entry of changes){if(!Array.isArray(entry)||entry.length!==4)continue;const [x,y,z,t]=entry;if([x,y,z,t].every(Number.isInteger))this.set(x,y,z,t);}}
  serialize(){return [...this.changes].map(([k,t])=>[...k.split(',').map(Number),t]);}
 }
-export function overlapsBlock(p,x,y,z){return p.x+.29>x&&p.x-.29<x+1&&p.y+1.75>y&&p.y<y+1&&p.z+.29>z&&p.z-.29<z+1;}
+export function overlapsBlock(p,x,y,z){const r=p.radius??.29,h=p.height??1.75;return p.x+r>x&&p.x-r<x+1&&p.y+h>y&&p.y<y+1&&p.z+r>z&&p.z-r<z+1;}
 export function collides(world,p){
- if(p.x-.29<-HALF||p.x+.29>HALF||p.z-.29<-HALF||p.z+.29>HALF)return true;
- for(let x=Math.floor(p.x-.29);x<=Math.floor(p.x+.29);x++)for(let y=Math.floor(p.y+.001);y<=Math.floor(p.y+1.749);y++)for(let z=Math.floor(p.z-.29);z<=Math.floor(p.z+.29);z++)if(world.get(x,y,z))return true;
+ const r=p.radius??.29,h=p.height??1.75,eps=.00001;
+ if(p.x-r<-HALF||p.x+r>HALF||p.z-r<-HALF||p.z+r>HALF)return true;
+ for(let x=Math.floor(p.x-r+eps);x<=Math.floor(p.x+r-eps);x++)for(let y=Math.floor(p.y+eps);y<=Math.floor(p.y+h-eps);y++)for(let z=Math.floor(p.z-r+eps);z<=Math.floor(p.z+r-eps);z++)if(world.get(x,y,z))return true;
  return false;
 }
 export function castRay(world,origin,dir,max=7){

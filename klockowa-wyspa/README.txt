@@ -2,12 +2,27 @@ KLOCKOWA WYSPA
 Prosta, autorska gra voxelowa w trybie kreatywnym.
 
 Komputer: WASD — ruch, mysz — widok, spacja — skok.
-Lewy przycisk myszy — usuń klocek. Prawy — postaw klocek.
-1–8 lub kółko myszy — materiał. Esc — menu.
-Jeśli przeglądarka nie przejmuje myszy: przeciągaj po świecie,
-strzałkami obracaj kamerę, Q usuwa, E stawia klocek.
+Lewy przycisk myszy — kop. Prawy — postaw klocek / nakarm zwierzę.
+1–8 — klocki. 9 — przysmak. Kółko myszy — wybór przedmiotu.
+E — ekwipunek. Q — wyrzuć przedmiot; podejdź, aby go podnieść.
+Środkowy przycisk myszy — wybierz wskazany rodzaj klocka.
+Shift — skradanie i ochrona przed zejściem z krawędzi.
+Ctrl podczas ruchu do przodu lub dwukrotne W — sprint.
+Esc — menu (lub zamknięcie ekwipunku). Przytrzymanie spacji powtarza skok.
+Gra próbuje przejąć mysz po kliknięciu Zaczynamy; Esc zwalnia kursor.
+Przycisk Włącz swobodną mysz pozwala ponowić próbę w geście gracza.
+Jeśli przeglądarka nie przejmuje myszy: przeciągaj po świecie albo
+strzałkami obracaj kamerę. Przeglądarka podglądu może ograniczać Pointer Lock.
 Telefon: w menu włącz sterowanie dotykowe, jeśli nie włączyło się samo.
 Drążek — ruch, przeciągnięcie po świecie — kamera, przyciski — akcje.
+
+ZWIERZĄTKA
+Dwie owieczki, dwie świnki i dwa króliki spacerują po wyspie.
+Trzymaj przysmak (9), żeby podeszły. Wyceluj z bliska i kliknij prawym
+przyciskiem lub dotknij Karm. Serduszka oznaczają udane karmienie.
+Zwierzątka omijają klocki, mogą pokonać stopień i opadają po wykopaniu
+podparcia. Nie można postawić klocka wewnątrz zwierzątka ani go skrzywdzić.
+Stare budowle są zachowane. Zapis obejmuje również przyjaźnie ze zwierzętami.
 
 Zapis automatyczny jest lokalny dla przeglądarki i adresu strony.
 Tryb prywatny lub usunięcie danych przeglądarki może usunąć zapis.
