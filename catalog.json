@@ -22,5 +22,11 @@
     "title": "Smocza Dolina — Zaginione jajka",
     "description": "Lataj nad doliną, ziej ogniem i lodem, zbierz 8 jajek w chmurach i zaprzyjaźnij się ze smokiem Luną.",
     "icon": "smocza-dolina/icon.svg"
+  },
+  {
+    "slug": "klockowa-wyspa",
+    "title": "Klockowa Wyspa",
+    "description": "Odkrywaj wyspę, kop i buduj z kolorowych klocków. Spokojny tryb kreatywny z zapisem świata, na komputer i telefon.",
+    "icon": "klockowa-wyspa/icon.svg"
   }
 ]

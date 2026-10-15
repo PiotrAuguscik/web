@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e9f0de">
+  <meta name="description" content="Twoja mała wyspa z klocków. Odkrywaj, kop i buduj bez limitów, prosto w przeglądarce.">
+  <title>Klockowa Wyspa — buduj po swojemu</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=1">
+</head>
+<body>
+  <canvas id="world" aria-label="Świat gry 3D"></canvas>
+  <header>
+    <a class="brand" href="#" aria-label="Klockowa Wyspa — menu"><img src="./icon.svg" alt="" width="42" height="42"><span>Klockowa<br><b>Wyspa</b></span></a>
+    <div class="top-actions"><span class="mode"><i></i> Tryb kreatywny</span><button id="fullscreen" title="Włącz pełny ekran">⛶ <span>Pełny ekran</span></button><button id="pause" title="Menu i pomoc">Ⅱ <span>Menu</span></button></div>
+  </header>
+  <div id="crosshair" hidden><i></i><i></i></div>
+  <div id="hint" hidden>Wyceluj w klocek</div>
+  <div id="save" role="status">Twój własny kawałek świata</div>
+  <div id="toast" role="status"></div>
+  <section id="menu" aria-label="Menu gry">
+    <div class="intro">
+      <span class="eyebrow">MAŁY ŚWIAT. WIELKIE POMYSŁY.</span>
+      <h1>Zbuduj coś <br><em>swojego.</em></h1>
+      <p>Przed tobą cała wyspa i kieszenie pełne klocków.<br>Co powstanie tutaj dzisiaj?</p>
+      <button id="play" class="primary" disabled>Przygotowuję wyspę…</button>
+      <div class="instructions desktop-help"><span><kbd>W A S D</kbd> chodzenie</span><span><kbd>SPACJA</kbd> skok</span><span><kbd>mysz</kbd> rozglądanie</span><span><kbd>lewy klik</kbd> usuń klocek</span><span><kbd>prawy klik</kbd> postaw klocek</span><span><kbd>1–8</kbd> wybierz klocek</span></div>
+      <p class="touch-help">Lewy drążek: ruch · przeciągnij po świecie: rozglądanie.<br>Przyciski po prawej: skok, stawianie i usuwanie.</p>
+      <div class="menu-tools"><button id="home">⌂ Wróć na polanę</button><button id="touch-toggle">Sterowanie dotykowe</button></div>
+      <div class="reset-wrap"><button id="reset">Nowa wyspa</button><div id="reset-confirm" hidden>Usunąć budowle z tej przeglądarki? <button id="reset-yes">Tak, zacznij od nowa</button><button id="reset-no">Anuluj</button></div></div>
+      <small>Bez walki i pośpiechu. Budowle zapisują się na tym urządzeniu.</small>
+    </div>
+    <div class="island-note"><span>☀</span> TWOJA WYSPA CZEKA</div>
+  </section>
+  <div id="hotbar" aria-label="Wybór klocka"></div>
+  <div id="bottom-help"><span><b>LEWY KLIK</b> usuń</span><span><b>PRAWY KLIK</b> buduj</span><span><b>SPACJA</b> skocz</span><span><b>ESC</b> menu</span></div>
+  <div id="touch-controls" hidden>
+    <div id="joystick" aria-label="Drążek ruchu"><div id="stick"></div></div>
+    <div class="touch-actions"><button id="jump" aria-label="Skocz">↑<small>Skok</small></button><button id="remove" aria-label="Usuń klocek">−<small>Usuń</small></button><button id="place" aria-label="Postaw klocek">＋<small>Buduj</small></button></div>
+  </div>
+  <noscript>Ta gra wymaga włączonej obsługi JavaScript.</noscript>
+  <script src="./vendor/three.min.js"></script>
+  <script type="module" src="./game.js?v=1"></script>
+</body>
+</html>
