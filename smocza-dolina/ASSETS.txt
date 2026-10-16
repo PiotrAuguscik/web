@@ -1,0 +1,7 @@
+Jajo Zorzy — original model created for Smocza Dolina in Blender 4.5 LTS.
+Turquoise shell, faceted jade scales and gold borders. No external textures or assets.
+Editable source: delivered separately as jajo-zorzy.blend with its Python generation script.
+Game meshes in egg-model.mjs are baked directly from jajo-zorzy.glb without simplifying the model.
+Three geometry/material pairs are shared by all world and nest eggs.
+The showroom pedestal, orbit, cameras and studio lights are excluded from the game asset.
+Three.js license: vendor/THREE-LICENSE.txt.
