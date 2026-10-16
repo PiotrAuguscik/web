@@ -5,3 +5,11 @@ Game meshes in egg-model.mjs are baked directly from jajo-zorzy.glb without simp
 Three geometry/material pairs are shared by all world and nest eggs.
 The showroom pedestal, orbit, cameras and studio lights are excluded from the game asset.
 Three.js license: vendor/THREE-LICENSE.txt.
+
+Smok Zorzy — original model created for Smocza Dolina in Blender 4.5 LTS.
+Sculpted body, curved horns, raised scales, scalloped wing membranes and a crystal tail light.
+Source delivered separately as smok-zorzy.blend, smok-zorzy.glb and its generation script.
+dragon-model.mjs preserves the GLB geometry, hierarchy and three exported animation clips.
+The game uses the Blender wing clips with flight/glide/ground visual weights.
+Luna reuses the same geometry with independent blue materials and illumination.
+All textures/reflections are generated locally; no external art assets were used.
